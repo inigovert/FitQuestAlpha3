@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         override fun onSuccess() {
             viewModel.setConfigured(true)
-            Log.d("Activity", "succeced to configure")
+            Log.d("Activity", "succeeded to configure")
         }
     }
 
@@ -57,19 +57,17 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         super.onCreate(savedInstanceState)
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        requestPermmions()
+        requestPermissions()
         observeConfiguration()
         setClickListeners()
     }
 
     private fun setClickListeners() {
         binding.startAssessment.setOnClickListener {
-            if (smKitUI != null) {
-                smKitUI!!.startAssessment(this)
-            }
+            smKitUI?.startAssessment(this)
         }
         binding.startCustomWorkout.setOnClickListener {
-            if(smKitUI != null) {
+            smKitUI?.let {
                 val smWorkout = SMWorkout(
                     id = "",
                     name = "TEST",
@@ -78,13 +76,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                     exercises = viewModel.exercies(),
                     workoutClosure = Uri.EMPTY
                 )
-                smKitUI!!.startWorkout(smWorkout, this)
+                it.startWorkout(smWorkout, this)
             }
-        }
-        binding.configureButton.setOnClickListener {
-            binding.progressBar.visibility = View.VISIBLE
-            smKitUI = SMKitUI.Configuration(baseContext).setUIKey(apiPublicKey)
-                .configure(configurationResult)
         }
         binding.profileButton.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
@@ -93,10 +86,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
         }
-
-
     }
-
 
     private fun observeConfiguration() {
         viewModel.configured.observe(this) {
@@ -108,12 +98,19 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private fun requestPermmions() {
+    private fun requestPermissions() {
         if (!hasPermissions(baseContext)) {
             launcher.launch(PERMISSIONS_REQUIRED)
         } else {
-            binding.configureButton.isEnabled = true
+            configureKit()
         }
+    }
+
+    private fun configureKit() {
+        binding.progressBar.visibility = View.VISIBLE
+        smKitUI = SMKitUI.Configuration(baseContext)
+            .setUIKey(apiPublicKey)
+            .configure(configurationResult)
     }
 
     override fun didExitWorkout(summary: WorkoutSummaryData) {
@@ -133,15 +130,13 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        // Handle Permission granted/rejected
         var permissionGranted = true
         permissions.entries.forEach {
             if (it.key in PERMISSIONS_REQUIRED && !it.value) permissionGranted = false
         }
         if (permissionGranted && permissions.isNotEmpty()) {
-            binding.configureButton.isEnabled = true
-        }
-        if (!permissionGranted) {
+            configureKit()
+        } else {
             Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
         }
     }
@@ -149,7 +144,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     companion object {
         private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
-        /** Convenience method used to check if all permissions required by this app are granted */
         fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
