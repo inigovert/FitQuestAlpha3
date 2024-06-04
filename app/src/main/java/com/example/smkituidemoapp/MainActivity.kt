@@ -13,8 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProviders
 import com.example.smkituidemoapp.databinding.MainActivityBinding
 import com.example.smkituidemoapp.viewModels.MainViewModel
 import com.sency.smbase.core.listener.ConfigurationResult
@@ -24,6 +22,7 @@ import com.sency.smkitui.listener.SMKitUIWorkoutListener
 import com.sency.smkitui.model.ExerciseData
 import com.sency.smkitui.model.SMWorkout
 import com.sency.smkitui.model.WorkoutSummaryData
+import com.sency.smkitui.model.SMExercise
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
@@ -61,6 +60,26 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         observeConfiguration()
         setClickListeners()
     }
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun startWorkoutForExercise(exercise: SMExercise) {
+        if (smKitUI == null) {
+            showToast("Please configure first")
+            return
+        }
+
+        val workout = SMWorkout(
+            id = exercise.name.toLowerCase().replace(" ", "_") + "_workout",
+            name = "${exercise.name} Workout",
+            workoutIntro = Uri.EMPTY,
+            soundtrack = Uri.EMPTY,
+            exercises = listOf(exercise), // List with the single selected exercise
+            workoutClosure = Uri.EMPTY
+        )
+        smKitUI?.startWorkout(workout, this)
+    }
 
     private fun setClickListeners() {
         binding.startAssessment.setOnClickListener {
@@ -83,10 +102,15 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
 
+        binding.squatButton.setOnClickListener {
+            startWorkoutForExercise(viewModel.exercies()[1]) // Squat is at index 1
+        }
+
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
         }
     }
+
 
     private fun observeConfiguration() {
         viewModel.configured.observe(this) {
