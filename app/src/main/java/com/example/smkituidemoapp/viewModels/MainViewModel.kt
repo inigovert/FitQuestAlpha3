@@ -24,7 +24,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun exercies() = listOf(
+    fun exercises() = listOf(
         SMExercise(
             name = "High Knees",
             exerciseIntro = Uri.EMPTY, // Custom sound,

@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                     name = "TEST",
                     workoutIntro = Uri.EMPTY,
                     soundtrack = Uri.EMPTY,
-                    exercises = viewModel.exercies(),
+                    exercises = viewModel.exercises(),
                     workoutClosure = Uri.EMPTY
                 )
                 it.startWorkout(smWorkout, this)
@@ -103,11 +103,14 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
 
         binding.squatButton.setOnClickListener {
-            startWorkoutForExercise(viewModel.exercies()[1]) // Squat is at index 1
+            startWorkoutForExercise(viewModel.exercises()[1]) // Squat is at index 1
         }
 
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
+        }
+        binding.chooseWorkoutButton.setOnClickListener {
+            startActivity(Intent(this, chooseWorkoutActivity::class.java))
         }
     }
 
