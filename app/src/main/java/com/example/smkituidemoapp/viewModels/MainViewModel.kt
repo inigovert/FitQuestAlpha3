@@ -1,15 +1,13 @@
 package com.example.smkituidemoapp.viewModels
 
-import android.content.Context
+
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sency.smkitui.model.SMExercise
-import com.sency.smkitui.model.SMWorkout
 import com.sency.smkitui.model.UiElement
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -23,7 +21,6 @@ class MainViewModel : ViewModel() {
             _configured.postValue(configured)
         }
     }
-
     fun exercises() = listOf(
         SMExercise(
             name = "High Knees",

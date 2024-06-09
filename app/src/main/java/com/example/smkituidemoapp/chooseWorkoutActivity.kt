@@ -3,21 +3,34 @@ package com.example.smkituidemoapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.smkituidemoapp.viewModels.MainViewModel
 
 class ChooseWorkoutActivity : AppCompatActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_workout)
 
-        val squatButton = findViewById<Button>(R.id.squatBtn)
+        val layout = findViewById<LinearLayout>(R.id.workoutButtonLayout)
+        val exercises = viewModel.exercises()
 
-        squatButton.setOnClickListener {
-            val intent = Intent()
-            intent.putExtra("selectedExercise", "Squat Regular Static") // Pass exercise name
-            setResult(RESULT_OK, intent)
-            finish() // Close this activity
+        for ((index, exercise) in exercises.withIndex()) {
+            val button = Button(this).apply {
+                text = exercise.name
+                setOnClickListener {
+                    val intent = Intent().apply {
+                        putExtra("selectedExerciseIndex", index)
+                    }
+                    setResult(RESULT_OK, intent)
+                    finish()
+                }
+            }
+            layout.addView(button)
         }
     }
 }

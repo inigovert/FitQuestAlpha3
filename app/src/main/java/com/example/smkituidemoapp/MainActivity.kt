@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         observeConfiguration()
         setClickListeners()
     }
+
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -73,11 +74,11 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
 
         val workout = SMWorkout(
-            id = exercise.name.toLowerCase().replace(" ", "_") + "_workout",
+            id = exercise.name.lowercase().replace(" ", "_") + "_workout",
             name = "${exercise.name} Workout",
             workoutIntro = Uri.EMPTY,
             soundtrack = Uri.EMPTY,
-            exercises = listOf(exercise), // List with the single selected exercise
+            exercises = listOf(exercise),
             workoutClosure = Uri.EMPTY
         )
         smKitUI?.startWorkout(workout, this)
@@ -92,8 +93,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 val smWorkout = SMWorkout(
                     id = "",
                     name = "TEST",
-                    workoutIntro = Uri.EMPTY,
-                    soundtrack = Uri.EMPTY,
+                    workoutIntro = Uri.EMPTY ,
+                    soundtrack = Uri.EMPTY ,
                     exercises = viewModel.exercises(),
                     workoutClosure = Uri.EMPTY
                 )
@@ -119,26 +120,14 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d("MainActivity", "onActivityResult - requestCode: $requestCode, resultCode: $resultCode")
 
         if (requestCode == REQUEST_CODE_CHOOSE_WORKOUT && resultCode == RESULT_OK) {
-            val selectedExercise = data?.getStringExtra("selectedExercise")
-            Log.d("MainActivity", "Selected exercise: $selectedExercise")
-
-            val exerciseToStart = viewModel.exercises().find { it.name.lowercase() == selectedExercise?.lowercase() }
-            if (exerciseToStart != null) {
-                Log.d("MainActivity", "Found exercise: ${exerciseToStart.name}")
-                startWorkoutForExercise(exerciseToStart)
-            } else {
-                Log.d("MainActivity", "Exercise not found!")
+            val selectedExerciseIndex = data?.getIntExtra("selectedExerciseIndex", -1) ?: -1
+            if (selectedExerciseIndex != -1) {
+                startWorkoutForExercise(viewModel.exercises()[selectedExerciseIndex])
             }
-        } else {
-            Log.d("MainActivity", "Request code or result code did not match")
         }
     }
-
-
-
 
     private fun observeConfiguration() {
         viewModel.configured.observe(this) {
