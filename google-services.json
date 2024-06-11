@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "32473756709",
+    "firebase_url": "https://fitquest-3ea1c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fitquest-3ea1c",
+    "storage_bucket": "fitquest-3ea1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32473756709:android:52180e8ade6a51cd4afbcc",
+        "android_client_info": {
+          "package_name": "com.ATMR.FitQuest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFl1TXH0HL7PbLhCd-qXgQcwLZGS5EkOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32473756709:android:4bafd95e327841fb4afbcc",
+        "android_client_info": {
+          "package_name": "com.example.smkituidemoapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFl1TXH0HL7PbLhCd-qXgQcwLZGS5EkOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
