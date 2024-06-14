@@ -34,18 +34,18 @@ class MainViewModel : ViewModel() {
             exerciseClosure = Uri.EMPTY // Custom sound
         ),
         SMExercise(
-            name = "Squat Regular Static",
+            name = "Squats",
             exerciseIntro = Uri.EMPTY, // Custom sound,
             totalSeconds = 30,
             introSeconds = 5,
             videoInstruction = Uri.EMPTY,
-            uiElements = setOf(UiElement.GaugeOfMotion, UiElement.Timer),
-            detector = "SquatRegularStatic",
-            repBased = false,
+            uiElements = setOf(UiElement.RepsCounter, UiElement.Timer),
+            detector = "SquatRegular",
+            repBased = true,
             exerciseClosure = Uri.EMPTY // Custom sound
         ),
         SMExercise(
-            name = "Plank High Static",
+            name = "Plank",
             exerciseIntro = Uri.EMPTY, // Custom sound,
             totalSeconds = 30,
             introSeconds = 5,
