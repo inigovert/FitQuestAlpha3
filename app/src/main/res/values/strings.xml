@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">SMKitUI Demo App</string>
+    <string name="app_name">FitQuest</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
 </resources>

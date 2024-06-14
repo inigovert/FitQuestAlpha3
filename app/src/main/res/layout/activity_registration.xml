@@ -6,17 +6,18 @@
     android:background="@color/primary_color"
     android:padding="24dp">
 
-    <TextView
-        android:id="@+id/registerTitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="FitQuest"
-        android:textColor="@color/white"
-        android:textSize="48sp"
+    <ImageView
+        android:id="@+id/appLogo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="24dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/logo"
+        app:layout_constraintDimensionRatio="3:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/firstNameInputLayout"
@@ -33,7 +34,7 @@
         app:layout_constraintEnd_toStartOf="@+id/lastNameInputLayout"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/registerTitleText"
+        app:layout_constraintTop_toBottomOf="@+id/appLogo"
         app:layout_constraintWidth_percent="0.45">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -61,7 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/firstNameInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/registerTitleText"
+        app:layout_constraintTop_toBottomOf="@+id/appLogo"
         app:layout_constraintWidth_percent="0.45">
 
         <com.google.android.material.textfield.TextInputEditText

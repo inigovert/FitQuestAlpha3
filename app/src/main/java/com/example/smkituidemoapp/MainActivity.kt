@@ -88,26 +88,26 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.startAssessment.setOnClickListener {
             smKitUI?.startAssessment(this)
         }
-        binding.startCustomWorkout.setOnClickListener {
-            smKitUI?.let {
-                val smWorkout = SMWorkout(
-                    id = "",
-                    name = "TEST",
-                    workoutIntro = Uri.EMPTY ,
-                    soundtrack = Uri.EMPTY ,
-                    exercises = viewModel.exercises(),
-                    workoutClosure = Uri.EMPTY
-                )
-                it.startWorkout(smWorkout, this)
-            }
-        }
+//        binding.startCustomWorkout.setOnClickListener { former custom workout button
+//            smKitUI?.let {
+//                val smWorkout = SMWorkout(
+//                    id = "",
+//                    name = "TEST",
+//                    workoutIntro = Uri.EMPTY ,
+//                    soundtrack = Uri.EMPTY ,
+//                    exercises = viewModel.exercises(),
+//                    workoutClosure = Uri.EMPTY
+//                )
+//                it.startWorkout(smWorkout, this)
+//            }
+//        }
         binding.profileButton.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
 
-        binding.squatButton.setOnClickListener {
-            startWorkoutForExercise(viewModel.exercises()[1]) // Squat is at index 1
-        }
+//        binding.squatButton.setOnClickListener { former squat button
+//            startWorkoutForExercise(viewModel.exercises()[1]) // Squat is at index 1
+//        }
 
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             if (it) {
                 binding.progressBar.visibility = View.INVISIBLE
                 binding.startAssessment.visibility = View.VISIBLE
-                binding.startCustomWorkout.visibility = View.VISIBLE
+                //binding.startCustomWorkout.visibility = View.VISIBLE
             }
         }
     }
