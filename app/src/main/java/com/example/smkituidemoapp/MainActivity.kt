@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.smkituidemoapp.databinding.MainActivityBinding
 import com.example.smkituidemoapp.viewModels.MainViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.sency.smbase.core.listener.ConfigurationResult
 import com.sency.smkitui.BuildConfig
 import com.sency.smkitui.SMKitUI
@@ -61,11 +64,44 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         requestPermissions()
         observeConfiguration()
         setClickListeners()
+        fetchAndDisplayUserPoints()
     }
 
+    private fun fetchAndDisplayUserPoints() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(currentUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        val points = document.getLong("points") ?: 0
+                        binding.pointsTextView.text = "Points: $points"
+                    } else {
+                        Log.d(tag, "No user document found. Creating one with initial points.")
+                        createUserDocumentInFirestore(currentUser.uid, 0) // Create with 0 points
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(tag, "Error getting user data: ", exception)
+                    // Handle the error (e.g., show a toast or log message)
+                }
+        } else {
+            binding.pointsTextView.text = "Points: 0"
+            // You might want to handle the case where the user is not logged in here.
+        }
+    }
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+    // Function to update points in Firestore
+//    private fun updatePointsInDatabase(userId: String, newPoints: Long) {
+//        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+//        userRef.update("points", newPoints) // Update points in Firestore
+//            .addOnSuccessListener { Log.d("MainActivity", "Points updated successfully") }
+//            .addOnFailureListener { e -> Log.e("MainActivity", "Error updating points", e) }
+//    }
 
     private fun startWorkoutForExercise(exercise: SMExercise) {
         if (smKitUI == null) {
@@ -168,8 +204,62 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     override fun workoutDidFinish(summary: WorkoutSummaryData) {
         Log.d(tag, "workoutDidFinish: $summary")
-    }
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
 
+        if (userId != null) {
+            processScoreForRewards(userId, summary.score)
+        }
+
+    }
+    private fun processScoreForRewards(userId: String, workoutScore: Int) {
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Document exists, update points
+                    updatePointsInDatabase(userId, workoutScore)
+                } else {
+                    // Document doesn't exist, create it with initial points
+                    createUserDocumentInFirestore(userId, workoutScore)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e(tag, "Error getting user document", exception)
+                // Handle the error appropriately (e.g., show a message to the user)
+            }
+        // Update the user's points in Firestore
+        fetchAndDisplayUserPoints()
+    }
+    private fun createUserDocumentInFirestore(userId: String, initialPoints: Int) {
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        val userData = hashMapOf(
+            "userId" to userId,
+            "points" to initialPoints.toLong() // Store points as Long
+        )
+        userRef.set(userData)
+            .addOnSuccessListener {
+                // Document created successfully
+                Log.d(tag, "User document created with ID: $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.e(tag, "Error creating user document", e)
+                // Handle the error appropriately
+            }
+    }
+    private fun updatePointsInDatabase(userId: String, workoutScore: Int) {
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+
+        val pointsToAward = when {
+            workoutScore >= 90 -> 50
+            workoutScore >= 70 -> 25
+            else -> 10
+        }
+
+        userRef.update("points", FieldValue.increment(pointsToAward.toLong()))
+            .addOnSuccessListener { Log.d("MainActivity", "Points updated successfully") }
+            .addOnFailureListener { e -> Log.e("MainActivity", "Error updating points", e) }
+    }
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         var permissionGranted = true
         permissions.entries.forEach {
