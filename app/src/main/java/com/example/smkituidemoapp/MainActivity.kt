@@ -26,6 +26,7 @@ import com.sency.smkitui.model.ExerciseData
 import com.sency.smkitui.model.SMWorkout
 import com.sency.smkitui.model.WorkoutSummaryData
 import com.sency.smkitui.model.SMExercise
+import com.example.smkituidemoapp.databinding.ActivityChooseWorkoutBinding
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
@@ -76,11 +77,11 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        val points = document.getLong("points") ?: 0
+                        val points = document.getDouble("points") ?: 0.0
                         binding.pointsTextView.text = "Points: $points"
                     } else {
                         Log.d(tag, "No user document found. Creating one with initial points.")
-                        createUserDocumentInFirestore(currentUser.uid, 0) // Create with 0 points
+                        createUserDocumentInFirestore(currentUser.uid, 0.0) // Create with 0 points
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -196,6 +197,12 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     override fun exerciseDidFinish(data: ExerciseData) {
         Log.d(tag, "exerciseDidFinish: $data")
+        if (viewModel.awardPointsPerExercise) { // Check if awarding points per exercise is enabled
+            val userId = FirebaseAuth.getInstance().currentUser?.uid // Check for logged-in user
+            if (userId != null) {
+                processScoreForRewards(userId, data.totalScore) // Pass the exercise score
+            }
+        }
     }
 
     override fun handleWorkoutErrors(error: Error) {
@@ -206,36 +213,48 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         Log.d(tag, "workoutDidFinish: $summary")
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        if (userId != null) {
-            processScoreForRewards(userId, summary.score)
-        }
+//        if (userId != null) {
+//            processScoreForRewards(userId, summary.score)
+//        }
 
     }
-    private fun processScoreForRewards(userId: String, workoutScore: Int) {
+    private fun processScoreForRewards(userId: String, exerciseScore: Float) {
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
 
         userRef.get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     // Document exists, update points
-                    updatePointsInDatabase(userId, workoutScore)
+                    val currentPoints = document.getLong("points") ?: 0
+                    val pointsToAward = calculateRewardPoints(exerciseScore)
+                    val newPoints = (currentPoints + pointsToAward).toDouble()
+                    updatePointsInDatabase(userId, newPoints)
                 } else {
                     // Document doesn't exist, create it with initial points
-                    createUserDocumentInFirestore(userId, workoutScore)
+                    createUserDocumentInFirestore(userId, (calculateRewardPoints(exerciseScore).toDouble()))
                 }
             }
             .addOnFailureListener { exception ->
                 Log.e(tag, "Error getting user document", exception)
                 // Handle the error appropriately (e.g., show a message to the user)
+                showToast("Error updating points")
             }
         // Update the user's points in Firestore
         fetchAndDisplayUserPoints()
     }
-    private fun createUserDocumentInFirestore(userId: String, initialPoints: Int) {
+    private fun calculateRewardPoints(exerciseScore: Float): Long {
+        // Example calculation - adjust as needed
+        return when {
+            exerciseScore >= 90 -> 15 // Award more points for higher scores
+            exerciseScore >= 70 -> 10
+            else -> 5
+        }.toLong()  // Ensure the result is a Long
+    }
+    private fun createUserDocumentInFirestore(userId: String, initialPoints: Double) {
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
         val userData = hashMapOf(
             "userId" to userId,
-            "points" to initialPoints.toLong() // Store points as Long
+            "points" to initialPoints // Store as a Double (or Float)
         )
         userRef.set(userData)
             .addOnSuccessListener {
@@ -247,19 +266,14 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 // Handle the error appropriately
             }
     }
-    private fun updatePointsInDatabase(userId: String, workoutScore: Int) {
+    private fun updatePointsInDatabase(userId: String, newPoints: Double) { // Changed to Double
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
-
-        val pointsToAward = when {
-            workoutScore >= 90 -> 50
-            workoutScore >= 70 -> 25
-            else -> 10
-        }
-
-        userRef.update("points", FieldValue.increment(pointsToAward.toLong()))
+        userRef.update("points", newPoints)
             .addOnSuccessListener { Log.d("MainActivity", "Points updated successfully") }
             .addOnFailureListener { e -> Log.e("MainActivity", "Error updating points", e) }
     }
+
+
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         var permissionGranted = true
         permissions.entries.forEach {

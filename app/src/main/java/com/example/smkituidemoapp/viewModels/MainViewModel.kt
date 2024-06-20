@@ -56,5 +56,7 @@ class MainViewModel : ViewModel() {
             exerciseClosure = Uri.EMPTY // Custom sound
         ),
     )
+    // Add this property to control point awarding behavior
+    var awardPointsPerExercise: Boolean = true
 
 }
