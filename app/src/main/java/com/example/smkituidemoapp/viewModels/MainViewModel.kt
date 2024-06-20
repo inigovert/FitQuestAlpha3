@@ -25,7 +25,7 @@ class MainViewModel : ViewModel() {
         SMExercise(
             name = "High Knees",
             exerciseIntro = Uri.EMPTY, // Custom sound,
-            totalSeconds = 30,
+            totalSeconds = 10,
             introSeconds = 5,
             videoInstruction = Uri.EMPTY,
             uiElements = setOf(UiElement.RepsCounter, UiElement.Timer),
@@ -36,7 +36,7 @@ class MainViewModel : ViewModel() {
         SMExercise(
             name = "Squats",
             exerciseIntro = Uri.EMPTY, // Custom sound,
-            totalSeconds = 30,
+            totalSeconds = 10,
             introSeconds = 5,
             videoInstruction = Uri.EMPTY,
             uiElements = setOf(UiElement.RepsCounter, UiElement.Timer),
@@ -47,7 +47,7 @@ class MainViewModel : ViewModel() {
         SMExercise(
             name = "Plank",
             exerciseIntro = Uri.EMPTY, // Custom sound,
-            totalSeconds = 30,
+            totalSeconds = 10,
             introSeconds = 5,
             videoInstruction = Uri.EMPTY,
             uiElements = setOf(UiElement.GaugeOfMotion, UiElement.Timer),
