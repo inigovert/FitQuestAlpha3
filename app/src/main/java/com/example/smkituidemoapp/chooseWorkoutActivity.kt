@@ -21,7 +21,7 @@ class ChooseWorkoutActivity : AppCompatActivity() {
 
         for ((index, exercise) in exercises.withIndex()) {
             val button = Button(this).apply {
-                text = exercise.name
+                text = exercise.prettyName
                 setOnClickListener {
                     val intent = Intent().apply {
                         putExtra("selectedExerciseIndex", index)

@@ -18,7 +18,9 @@ allprojects {
         google()
         mavenCentral()
         maven {
-            url "${artifactory_contentUrl}"
+
+            url "https://artifacts.sency.ai/artifactory/release/"
+
         }
     }
 }

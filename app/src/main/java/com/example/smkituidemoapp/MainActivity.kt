@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,7 +15,6 @@ import androidx.core.content.ContextCompat
 import com.example.smkituidemoapp.databinding.MainActivityBinding
 import com.example.smkituidemoapp.viewModels.MainViewModel
 import com.sency.smbase.core.listener.ConfigurationResult
-import com.sency.smkitui.BuildConfig
 import com.sency.smkitui.SMKitUI
 import com.sency.smkitui.listener.SMKitUIWorkoutListener
 import com.sency.smkitui.model.ExerciseData
@@ -26,31 +24,28 @@ import com.sency.smkitui.model.SMExercise
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
-    private val REQUEST_CODE_CHOOSE_WORKOUT = 101
+    private val WORKOUT = 101
 
     private var _binding: MainActivityBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel : MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
 
     private var smKitUI: SMKitUI? = null
 
     private val tag = this::class.java.simpleName
 
-    private val apiPublicKey = when (!BuildConfig.DEBUG) {
-        true -> "public_live_BrYk+UxJaahIPdnb"
-        else -> "public_live_#gdz3t)mW#\$39Crs"
-    }
+    private val apiPublicKey = "public_live_BrYk+UxJaahIPdnb"
 
     private val configurationResult = object : ConfigurationResult {
         override fun onFailure() {
             viewModel.setConfigured(false)
-            Log.d("Activity", "failed to configure")
+            Log.d(tag, "failed to configure")
         }
 
         override fun onSuccess() {
             viewModel.setConfigured(true)
-            Log.d("Activity", "succeeded to configure")
+            Log.d(tag, "succeeded to configure")
         }
     }
 
@@ -58,30 +53,25 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         super.onCreate(savedInstanceState)
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         requestPermissions()
-        observeConfiguration()
         setClickListeners()
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
     private fun startWorkoutForExercise(exercise: SMExercise) {
-        if (smKitUI == null) {
-            showToast("Please configure first")
-            return
+        smKitUI?.let {
+            val workout = SMWorkout(
+                id = exercise.prettyName.lowercase().replace(" ", "_") + "_workout",
+                name = "${exercise.prettyName} Workout",
+                workoutIntro = "",
+                soundtrack = "soundtrack_7",
+                exercises = listOf(exercise),
+                workoutClosure = "workoutClosure.mp3",
+                getInFrame = "bodycal_get_in_frame",
+                bodycalFinished = "bodycal_finished"
+            )
+            it.startWorkout(workout, this)
         }
-
-        val workout = SMWorkout(
-            id = exercise.name.lowercase().replace(" ", "_") + "_workout",
-            name = "${exercise.name} Workout",
-            workoutIntro = Uri.EMPTY,
-            soundtrack = Uri.EMPTY,
-            exercises = listOf(exercise),
-            workoutClosure = Uri.EMPTY
-        )
-        smKitUI?.startWorkout(workout, this)
     }
 
     private fun setClickListeners() {
@@ -91,12 +81,14 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.startCustomWorkout.setOnClickListener {
             smKitUI?.let {
                 val smWorkout = SMWorkout(
-                    id = "LegDay",
-                    name = "Leg Day",
-                    workoutIntro = Uri.EMPTY ,
-                    soundtrack = Uri.EMPTY ,
+                    id = "50",
+                    name = "Demo Workout",
+                    workoutIntro = "",
+                    soundtrack = "soundtrack_7",
                     exercises = viewModel.exercises(),
-                    workoutClosure = Uri.EMPTY
+                    workoutClosure = "workoutClosure.mp3",
+                    getInFrame = "bodycal_get_in_frame",
+                    bodycalFinished = "bodycal_finished"
                 )
                 it.startWorkout(smWorkout, this)
             }
@@ -104,37 +96,22 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.profileButton.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
-
-//        binding.squatButton.setOnClickListener { former squat button
-//            startWorkoutForExercise(viewModel.exercises()[1]) // Squat is at index 1
-//        }
-
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
         }
         binding.chooseWorkoutButton.setOnClickListener {
             val intent = Intent(this, ChooseWorkoutActivity::class.java)
-            startActivityForResult(intent, REQUEST_CODE_CHOOSE_WORKOUT)
+            startActivityForResult(intent, WORKOUT)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == REQUEST_CODE_CHOOSE_WORKOUT && resultCode == RESULT_OK) {
+        if (requestCode == WORKOUT && resultCode == RESULT_OK) {
             val selectedExerciseIndex = data?.getIntExtra("selectedExerciseIndex", -1) ?: -1
             if (selectedExerciseIndex != -1) {
                 startWorkoutForExercise(viewModel.exercises()[selectedExerciseIndex])
-            }
-        }
-    }
-
-    private fun observeConfiguration() {
-        viewModel.configured.observe(this) {
-            if (it) {
-                binding.progressBar.visibility = View.INVISIBLE
-                binding.startAssessment.visibility = View.VISIBLE
-                //binding.startCustomWorkout.visibility = View.VISIBLE
             }
         }
     }
@@ -168,19 +145,53 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     override fun workoutDidFinish(summary: WorkoutSummaryData) {
         Log.d(tag, "workoutDidFinish: $summary")
+
+        // Extract and display exercise scores
+        val exercises = summary.exercises
+        for (exercise in exercises) {
+            val exerciseScore = exercise.totalScore
+            Log.d(tag, "Exercise ${exercise.prettyName}: Score = $exerciseScore")
+        }
+
+        // Calculate and display points using extracted scores
+        val totalExercises = summary.exercises.size
+        var totalScore = 0f
+
+        for (exercise in summary.exercises) {
+            totalScore += exercise.totalScore // Use exercise.totalScore
+        }
+
+        val averageScore = if (totalExercises > 0) totalScore / totalExercises else 0f
+        val points = calculatePoints(averageScore)
+
+        // Update viewModel
+        viewModel.updateExercisePoints(points)
+
+        // Update UI to display the calculated points
+        binding.pointsTextView.text = "Points: $points"
     }
 
-    private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        var permissionGranted = true
-        permissions.entries.forEach {
-            if (it.key in PERMISSIONS_REQUIRED && !it.value) permissionGranted = false
-        }
-        if (permissionGranted && permissions.isNotEmpty()) {
-            configureKit()
-        } else {
-            Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
+    private fun calculatePoints(averageScore: Float): Int {
+        return when {
+            averageScore >= 90 -> 50
+            averageScore >= 80 -> 40
+            averageScore >= 70 -> 30
+            averageScore >= 60 -> 20
+            else -> 10
         }
     }
+
+
+    private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val permissionGranted = permissions.entries.all {
+                it.key in PERMISSIONS_REQUIRED && it.value
+            }
+            if (permissionGranted) {
+                configureKit()
+            } else {
+                Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
+            }
+        }
 
     companion object {
         private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
