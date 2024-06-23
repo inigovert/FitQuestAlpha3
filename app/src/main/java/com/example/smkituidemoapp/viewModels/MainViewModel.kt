@@ -28,27 +28,27 @@ class MainViewModel : ViewModel() {
     }
 
     fun upperBodyWorkout() = listOf(
-//        SMExercise(
-//            prettyName = "Shoulder Press",
-//            exerciseIntro = "",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "ShouldersPress",
-//            repBased = true,
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 0,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
+        SMExercise(
+            prettyName = "Shoulder Press",
+            exerciseIntro = "ShouldersPressInstructionVideo", //no vid
+            totalSeconds = 10,
+            introSeconds = 0,
+            videoInstruction = "",
+            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+            detector = "ShouldersPress",
+            repBased = true,
+            exerciseClosure = "",
+            targetReps = 5,
+            targetTime = 0,
+            scoreFactor = 0.5, // Ensure this is Double
+            passCriteria = null,
+        ),
         SMExercise(
             prettyName = "Push Ups",
             totalSeconds = 10,
             introSeconds = 0,
             exerciseIntro = "0",
-            videoInstruction = "",
+            videoInstruction = "PushupRegularInstructionVideo",
             uiElements = setOf(UiElement.GaugeOfMotion, UiElement.Timer),
             detector = "PushupRegular",
             repBased = true,
@@ -63,7 +63,7 @@ class MainViewModel : ViewModel() {
             totalSeconds = 10,
             introSeconds = 0,
             exerciseIntro = "",
-            videoInstruction = "",
+            videoInstruction = "PlankHighKneeToElbowInstructionVideo", //no vid whitescreen
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "PlankHighKneeToElbow",
             repBased = false, //not sure kung repbased
@@ -78,7 +78,7 @@ class MainViewModel : ViewModel() {
             totalSeconds = 10,
             introSeconds = 0,
             exerciseIntro = "",
-            videoInstruction = "",
+            videoInstruction = "PlankHighShoulderTapsInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "PlankHighShoulderTaps",
             repBased = true,
@@ -88,21 +88,21 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-//        SMExercise(
-//            prettyName = "Standing Reverse Air Fly",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            exerciseIntro = "",
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "StandingStepReverseAirFly",
-//            repBased = true, //not sure kung rep based
-//            exerciseClosure = "",
-//            targetReps = 10,
-//            targetTime = 0,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        )
+        SMExercise(
+            prettyName = "Standing Reverse Air Fly",
+            totalSeconds = 10,
+            introSeconds = 0,
+            exerciseIntro = "",
+            videoInstruction = "StandingStepReverseAirFlyInstructionVideo", //novid whitescreen
+            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+            detector = "StandingStepReverseAirFly",
+            repBased = true, //not sure kung rep based
+            exerciseClosure = "",
+            targetReps = 10,
+            targetTime = 0,
+            scoreFactor = 0.5, // Ensure this is Double
+            passCriteria = null,
+        )
 
     )
     fun coreWorkout() = listOf(
@@ -111,7 +111,7 @@ class MainViewModel : ViewModel() {
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "CrunchesInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "Crunches",
             repBased = true,
@@ -121,88 +121,74 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-//        SMExercise(
-//            prettyName = "Standing Oblique Crunches",
-//            exerciseIntro = "",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "StandingObliqueCrunches",
-//            repBased = true,
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 0,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
-//        SMExercise(
-//            prettyName = "High Plank",
-//            exerciseIntro = "",
-//            totalSeconds = 15,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "PlankHighStatic",
-//            repBased = false,
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 10,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
-//        SMExercise(
-//            prettyName = "Side Plank",
-//            exerciseIntro = "",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "Crunches",
-//            repBased = false, //unsure
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 5,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
         SMExercise(
-            prettyName = "Standing Side Bend Right",
+            prettyName = "Standing Oblique Crunches",
+            exerciseIntro = "",
+            totalSeconds = 10,
+            introSeconds = 0,
+            videoInstruction = "StandingObliqueCrunchesInstructionVideo",
+            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+            detector = "StandingObliqueCrunches",
+            repBased = true,
+            exerciseClosure = "",
+            targetReps = 5,
+            targetTime = 0,
+            scoreFactor = 0.5, // Ensure this is Double
+            passCriteria = null,
+        ),
+        SMExercise(
+            prettyName = "High Plank",
             exerciseIntro = "",
             totalSeconds = 15,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "PlankHighStaticInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-            detector = "StandingSideBendRight",
+            detector = "PlankHighStatic",
             repBased = false,
             exerciseClosure = "",
             targetReps = 5,
             targetTime = 10,
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
-        ),SMExercise(
-            prettyName = "Standing Side Bend Left",
+        ),
+        SMExercise(
+            prettyName = "Side Plank",
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "PlankSideLowStaticInstructionVideo", //no vid
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-            detector = "StandingSideBendRightLeft",
+            detector = "PlankSideLowStatic",
             repBased = false, //unsure
             exerciseClosure = "",
             targetReps = 5,
             targetTime = 5,
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
-        )
+        ),
+//        SMExercise(
+//            prettyName = "Standing Side Bend", //workout gets stuck here
+//            exerciseIntro = "",
+//            totalSeconds = 15,
+//            introSeconds = 0,
+//            videoInstruction = "StandingSideBendInstructionVideo",
+//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+//            detector = "StandingSideBend",
+//            repBased = false,
+//            exerciseClosure = "",
+//            targetReps = 5,
+//            targetTime = 10,
+//            scoreFactor = 0.5, // Ensure this is Double
+//            passCriteria = null,
     )
+
     fun legsWorkout() = listOf(
         SMExercise(
             prettyName = "Squats",
             exerciseIntro = "",
-            totalSeconds = 10,
+            totalSeconds = 30,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "SquatRegularInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "SquatRegular",
             repBased = true,
@@ -217,7 +203,7 @@ class MainViewModel : ViewModel() {
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "LungeFrontInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "LungeFront",
             repBased = true,
@@ -232,7 +218,7 @@ class MainViewModel : ViewModel() {
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "LungeSideRightInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "LungeSideRight",
             repBased = true,
@@ -247,7 +233,7 @@ class MainViewModel : ViewModel() {
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "LungeSideLeftInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "LungeSideLeft",
             repBased = true,
@@ -257,12 +243,12 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-//        SMExercise(
+//        SMExercise( //no instruction vid
 //            prettyName = "Jumps",
 //            exerciseIntro = "",
 //            totalSeconds = 10,
 //            introSeconds = 0,
-//            videoInstruction = "",
+//            videoInstruction = "JumpsInstructionVideo",
 //            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
 //            detector = "Jumps",
 //            repBased = true,
@@ -280,7 +266,7 @@ class MainViewModel : ViewModel() {
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "JumpingJacksInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "JumpingJacks",
             repBased = true,
@@ -290,27 +276,27 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-//        SMExercise(
-//            prettyName = "Side Step Jacks",
-//            exerciseIntro = "",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "SideStepJacks",
-//            repBased = true,
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 0,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
+        SMExercise(
+            prettyName = "Side Step Jacks",
+            exerciseIntro = "",
+            totalSeconds = 10,
+            introSeconds = 0,
+            videoInstruction = "SideStepJacksInstructionVideo", //novid
+            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+            detector = "SideStepJacks",
+            repBased = true,
+            exerciseClosure = "",
+            targetReps = 5,
+            targetTime = 0,
+            scoreFactor = 0.5, // Ensure this is Double
+            passCriteria = null,
+        ),
         SMExercise(
             prettyName = "Skater Hops",
             exerciseIntro = "",
             totalSeconds = 10,
             introSeconds = 0,
-            videoInstruction = "",
+            videoInstruction = "SkaterHopsInstructionVideo",
             uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
             detector = "SkaterHops",
             repBased = true,
@@ -320,21 +306,21 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-//        SMExercise(
-//            prettyName = "Ski Jumps",
-//            exerciseIntro = "",
-//            totalSeconds = 10,
-//            introSeconds = 0,
-//            videoInstruction = "",
-//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-//            detector = "SkiJumps",
-//            repBased = true,
-//            exerciseClosure = "",
-//            targetReps = 5,
-//            targetTime = 0,
-//            scoreFactor = 0.5, // Ensure this is Double
-//            passCriteria = null,
-//        ),
+        SMExercise(
+            prettyName = "Ski Jumps",
+            exerciseIntro = "",
+            totalSeconds = 10,
+            introSeconds = 0,
+            videoInstruction = "SkiJumpsInstructionVideo",
+            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+            detector = "SkiJumps",
+            repBased = true,
+            exerciseClosure = "",
+            targetReps = 5,
+            targetTime = 0,
+            scoreFactor = 0.5, // Ensure this is Double
+            passCriteria = null,
+        ),
     )
 
     fun updateExercisePoints(points: Int) {

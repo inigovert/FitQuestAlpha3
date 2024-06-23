@@ -81,16 +81,6 @@
             android:text="BMI" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="36dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <Button
         android:id="@+id/upperBodyButton"
         android:layout_width="wrap_content"
@@ -153,5 +143,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/legsButton"
         app:layout_constraintVertical_bias="0.099" />
+
+    <TextView
+        android:id="@+id/dailyProgressMonitorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Workouts Done: 0/4"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/upperBodyButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/otherButtonContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

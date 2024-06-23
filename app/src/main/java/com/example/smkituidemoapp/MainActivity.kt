@@ -3,13 +3,16 @@ package com.example.smkituidemoapp
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.smkituidemoapp.databinding.MainActivityBinding
@@ -21,10 +24,15 @@ import com.sency.smkitui.model.ExerciseData
 import com.sency.smkitui.model.SMWorkout
 import com.sency.smkitui.model.WorkoutSummaryData
 import com.sency.smkitui.model.SMExercise
+import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     //private val WORKOUT = 101
+
+    private lateinit var sharedPreferences: SharedPreferences
+    @RequiresApi(Build.VERSION_CODES.O)
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") //this needs API26
 
     private var _binding: MainActivityBinding? = null
     private val binding get() = _binding!!
@@ -56,7 +64,9 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         requestPermissions()
         setClickListeners()
+
     }
+
 
 //    private fun startWorkoutForExercise(exercise: SMExercise) {
 //        smKitUI?.let {
@@ -78,6 +88,26 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.startAssessment.setOnClickListener {
             smKitUI?.startAssessment(this)
         }
+
+        val workoutButtons = listOf(
+            binding.startAssessment,
+            binding.upperBodyButton,
+            binding.coreButton,
+            binding.legsButton,
+            binding.cardioButton
+        )
+        workoutButtons.forEach { button ->
+            button.setOnClickListener {
+                val workoutId = when (button) {
+                    binding.startAssessment -> "assessment"
+                    binding.upperBodyButton -> "upperBody"
+                    binding.coreButton -> "core"
+                    binding.legsButton -> "legs"
+                    binding.cardioButton -> "cardio"
+                    else -> ""
+                }
+            }
+            }
         binding.upperBodyButton.setOnClickListener {
             smKitUI?.let {
                 val smWorkout = SMWorkout(
@@ -144,6 +174,9 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
         }
+        binding.rewardsButton.setOnClickListener{
+            startActivity(Intent(this, RewardsActivity::class.java))
+        }
 //        binding.chooseWorkoutButton.setOnClickListener {
 //            val intent = Intent(this, ChooseWorkoutActivity::class.java)
 //            startActivityForResult(intent, WORKOUT)
@@ -170,7 +203,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private fun configureKit() {
-        binding.progressBar.visibility = View.VISIBLE
+        //binding.progressBar.visibility = View.VISIBLE
         smKitUI = SMKitUI.Configuration(baseContext)
             .setUIKey(apiPublicKey)
             .configure(configurationResult)
