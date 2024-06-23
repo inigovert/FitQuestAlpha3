@@ -24,7 +24,7 @@ import com.sency.smkitui.model.SMExercise
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
-    private val WORKOUT = 101
+    //private val WORKOUT = 101
 
     private var _binding: MainActivityBinding? = null
     private val binding get() = _binding!!
@@ -58,39 +58,84 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         setClickListeners()
     }
 
-    private fun startWorkoutForExercise(exercise: SMExercise) {
-        smKitUI?.let {
-            val workout = SMWorkout(
-                id = exercise.prettyName.lowercase().replace(" ", "_") + "_workout",
-                name = "${exercise.prettyName} Workout",
-                workoutIntro = "",
-                soundtrack = "soundtrack_7",
-                exercises = listOf(exercise),
-                workoutClosure = "workoutClosure.mp3",
-                getInFrame = "bodycal_get_in_frame",
-                bodycalFinished = "bodycal_finished"
-            )
-            it.startWorkout(workout, this)
-        }
-    }
+//    private fun startWorkoutForExercise(exercise: SMExercise) {
+//        smKitUI?.let {
+//            val workout = SMWorkout(
+//                id = exercise.prettyName.lowercase().replace(" ", "_") + "_workout",
+//                name = "${exercise.prettyName} Workout",
+//                workoutIntro = "",
+//                soundtrack = "soundtrack_7",
+//                exercises = listOf(exercise),
+//                workoutClosure = "workoutClosure.mp3",
+//                getInFrame = "bodycal_get_in_frame",
+//                bodycalFinished = "bodycal_finished"
+//            )
+//            it.startWorkout(workout, this)
+//        }
+//    }
 
     private fun setClickListeners() {
         binding.startAssessment.setOnClickListener {
             smKitUI?.startAssessment(this)
         }
-        binding.startCustomWorkout.setOnClickListener {
+        binding.upperBodyButton.setOnClickListener {
             smKitUI?.let {
                 val smWorkout = SMWorkout(
-                    id = "50",
-                    name = "Demo Workout",
+                    id = "upperBody",
+                    name = "Upper Body Workout",
                     workoutIntro = "",
                     soundtrack = "soundtrack_7",
-                    exercises = viewModel.exercises(),
+                    exercises = viewModel.upperBodyWorkout(),
                     workoutClosure = "workoutClosure.mp3",
                     getInFrame = "bodycal_get_in_frame",
                     bodycalFinished = "bodycal_finished"
                 )
                 it.startWorkout(smWorkout, this)
+            }
+            binding.coreButton.setOnClickListener {
+                smKitUI?.let {
+                    val smWorkout = SMWorkout(
+                        id = "core",
+                        name = "Core Workout",
+                        workoutIntro = "",
+                        soundtrack = "soundtrack_7",
+                        exercises = viewModel.coreWorkout(),
+                        workoutClosure = "workoutClosure.mp3",
+                        getInFrame = "bodycal_get_in_frame",
+                        bodycalFinished = "bodycal_finished"
+                    )
+                    it.startWorkout(smWorkout, this)
+                }
+            }
+            binding.legsButton.setOnClickListener {
+                smKitUI?.let {
+                    val smWorkout = SMWorkout(
+                        id = "legs",
+                        name = "Leg Workout",
+                        workoutIntro = "",
+                        soundtrack = "soundtrack_7",
+                        exercises = viewModel.legsWorkout(),
+                        workoutClosure = "workoutClosure.mp3",
+                        getInFrame = "bodycal_get_in_frame",
+                        bodycalFinished = "bodycal_finished"
+                    )
+                    it.startWorkout(smWorkout, this)
+                }
+            }
+            binding.cardioButton.setOnClickListener {
+                smKitUI?.let {
+                    val smWorkout = SMWorkout(
+                        id = "cardio",
+                        name = "Cardio Workout",
+                        workoutIntro = "",
+                        soundtrack = "soundtrack_7",
+                        exercises = viewModel.cardioWorkout(),
+                        workoutClosure = "workoutClosure.mp3",
+                        getInFrame = "bodycal_get_in_frame",
+                        bodycalFinished = "bodycal_finished"
+                    )
+                    it.startWorkout(smWorkout, this)
+                }
             }
         }
         binding.profileButton.setOnClickListener {
@@ -99,22 +144,22 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.bmiCalculatorButton.setOnClickListener {
             startActivity(Intent(this, BMICalculatorActivity::class.java))
         }
-        binding.chooseWorkoutButton.setOnClickListener {
-            val intent = Intent(this, ChooseWorkoutActivity::class.java)
-            startActivityForResult(intent, WORKOUT)
-        }
+//        binding.chooseWorkoutButton.setOnClickListener {
+//            val intent = Intent(this, ChooseWorkoutActivity::class.java)
+//            startActivityForResult(intent, WORKOUT)
+//        }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == WORKOUT && resultCode == RESULT_OK) {
-            val selectedExerciseIndex = data?.getIntExtra("selectedExerciseIndex", -1) ?: -1
-            if (selectedExerciseIndex != -1) {
-                startWorkoutForExercise(viewModel.exercises()[selectedExerciseIndex])
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if (requestCode == WORKOUT && resultCode == RESULT_OK) {
+//            val selectedExerciseIndex = data?.getIntExtra("selectedExerciseIndex", -1) ?: -1
+//            if (selectedExerciseIndex != -1) {
+//                startWorkoutForExercise(viewModel.exercises()[selectedExerciseIndex])
+//            }
+//        }
+//    }
 
     private fun requestPermissions() {
         if (!hasPermissions(baseContext)) {

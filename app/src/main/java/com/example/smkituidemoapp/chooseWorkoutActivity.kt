@@ -17,20 +17,20 @@ class ChooseWorkoutActivity : AppCompatActivity() {
         setContentView(R.layout.activity_choose_workout)
 
         val layout = findViewById<LinearLayout>(R.id.workoutButtonLayout)
-        val exercises = viewModel.exercises()
+//        val exercises = viewModel.exercises()
 
-        for ((index, exercise) in exercises.withIndex()) {
-            val button = Button(this).apply {
-                text = exercise.prettyName
-                setOnClickListener {
-                    val intent = Intent().apply {
-                        putExtra("selectedExerciseIndex", index)
-                    }
-                    setResult(RESULT_OK, intent)
-                    finish()
-                }
-            }
-            layout.addView(button)
-        }
+//        for ((index, exercise) in exercises.withIndex()) {
+//            val button = Button(this).apply {
+//                text = exercise.prettyName
+//                setOnClickListener {
+//                    val intent = Intent().apply {
+//                        putExtra("selectedExerciseIndex", index)
+//                    }
+//                    setResult(RESULT_OK, intent)
+//                    finish()
+//                }
+//            }
+//            layout.addView(button)
+//        }
     }
 }
