@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     //ONCREATES
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -93,12 +94,11 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             resetTime = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() // Update reset time
             sharedPreferences.edit().putLong("resetTime", resetTime).apply()
         }
+
         updateDailyTrackerUI()
-
-
         requestPermissions()
         setClickListeners()
-
+        resetWorkoutCounterInFirestore()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -213,26 +213,24 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     override fun workoutDidFinish(summary: WorkoutSummaryData) {
         Log.d(tag, "workoutDidFinish: $summary")
 
-        // Extract and display exercise scores
         val exercises = summary.exercises
+        val totalExercises = exercises.size
+        var totalScore = 0f
+
+        // Calculate and log individual exercise scores
         for (exercise in exercises) {
             val exerciseScore = exercise.totalScore
             Log.d(tag, "Exercise ${exercise.prettyName}: Score = $exerciseScore")
-        }
-
-        // Calculate and display points using extracted scores
-        val totalExercises = summary.exercises.size
-        var totalScore = 0f
-
-        for (exercise in summary.exercises) {
-            totalScore += exercise.totalScore // Use exercise.totalScore
+            totalScore += exerciseScore
         }
 
         val averageScore = if (totalExercises > 0) totalScore / totalExercises else 0f
         val points = calculatePoints(averageScore)
 
-        // Update viewModel
-        viewModel.updateExercisePoints(points)
+        Log.d(tag, "Average Score: $averageScore, Points: $points")
+
+        // Update points in Firestore
+        updatePointsInFirestore(points)
     }
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateDailyTrackerUI() {
@@ -274,6 +272,30 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             }
         }
     }
+
+    private fun updatePointsInFirestore(points: Int) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val userRef = db.collection("users").document(userId)
+            userRef.update("points", FieldValue.increment(points.toDouble()))
+                .addOnSuccessListener {
+                    Log.d(tag, "Points updated in Firestore: $points")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(tag, "Error updating points in Firestore", e)
+                    // Consider showing an error message to the user
+                }
+        }
+    }
+    private fun calculatePoints(averageScore: Float): Int {
+        return when {
+            averageScore >= 90 -> 50
+            averageScore >= 80 -> 40
+            averageScore >= 70 -> 30
+            averageScore >= 60 -> 20
+            else -> 10
+        }
+    }
     private fun resetWorkoutCounterInFirestore() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid // Get current user ID
 
@@ -311,15 +333,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-    private fun calculatePoints(averageScore: Float): Int {
-        return when {
-            averageScore >= 90 -> 50
-            averageScore >= 80 -> 40
-            averageScore >= 70 -> 30
-            averageScore >= 60 -> 20
-            else -> 10
-        }
-    }
+
 
 
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->

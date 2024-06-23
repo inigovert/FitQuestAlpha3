@@ -198,51 +198,51 @@ class MainViewModel : ViewModel() {
             scoreFactor = 0.5, // Ensure this is Double
             passCriteria = null,
         ),
-        SMExercise(
-            prettyName = "Front Lunges",
-            exerciseIntro = "",
-            totalSeconds = 10,
-            introSeconds = 0,
-            videoInstruction = "LungeFrontInstructionVideo",
-            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-            detector = "LungeFront",
-            repBased = true,
-            exerciseClosure = "",
-            targetReps = 5,
-            targetTime = 0,
-            scoreFactor = 0.5, // Ensure this is Double
-            passCriteria = null,
-        ),
-        SMExercise(
-            prettyName = "Right Side Lunge",
-            exerciseIntro = "",
-            totalSeconds = 10,
-            introSeconds = 0,
-            videoInstruction = "LungeSideRightInstructionVideo",
-            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-            detector = "LungeSideRight",
-            repBased = true,
-            exerciseClosure = "",
-            targetReps = 5,
-            targetTime = 0,
-            scoreFactor = 0.5, // Ensure this is Double
-            passCriteria = null,
-        ),
-        SMExercise(
-            prettyName = "Left Side Lunge",
-            exerciseIntro = "",
-            totalSeconds = 10,
-            introSeconds = 0,
-            videoInstruction = "LungeSideLeftInstructionVideo",
-            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
-            detector = "LungeSideLeft",
-            repBased = true,
-            exerciseClosure = "",
-            targetReps = 5,
-            targetTime = 0,
-            scoreFactor = 0.5, // Ensure this is Double
-            passCriteria = null,
-        ),
+//        SMExercise(
+//            prettyName = "Front Lunges",
+//            exerciseIntro = "",
+//            totalSeconds = 10,
+//            introSeconds = 0,
+//            videoInstruction = "LungeFrontInstructionVideo",
+//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+//            detector = "LungeFront",
+//            repBased = true,
+//            exerciseClosure = "",
+//            targetReps = 5,
+//            targetTime = 0,
+//            scoreFactor = 0.5, // Ensure this is Double
+//            passCriteria = null,
+//        ),
+//        SMExercise(
+//            prettyName = "Right Side Lunge",
+//            exerciseIntro = "",
+//            totalSeconds = 10,
+//            introSeconds = 0,
+//            videoInstruction = "LungeSideRightInstructionVideo",
+//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+//            detector = "LungeSideRight",
+//            repBased = true,
+//            exerciseClosure = "",
+//            targetReps = 5,
+//            targetTime = 0,
+//            scoreFactor = 0.5, // Ensure this is Double
+//            passCriteria = null,
+//        ),
+//        SMExercise(
+//            prettyName = "Left Side Lunge",
+//            exerciseIntro = "",
+//            totalSeconds = 10,
+//            introSeconds = 0,
+//            videoInstruction = "LungeSideLeftInstructionVideo",
+//            uiElements = setOf(UiElement.Timer, UiElement.GaugeOfMotion),
+//            detector = "LungeSideLeft",
+//            repBased = true,
+//            exerciseClosure = "",
+//            targetReps = 5,
+//            targetTime = 0,
+//            scoreFactor = 0.5, // Ensure this is Double
+//            passCriteria = null,
+//        ),
 //        SMExercise( //no instruction vid
 //            prettyName = "Jumps",
 //            exerciseIntro = "",
@@ -258,8 +258,8 @@ class MainViewModel : ViewModel() {
 //            scoreFactor = 0.5, // Ensure this is Double
 //            passCriteria = null,
 //        )
-
-    )
+//
+   )
     fun cardioWorkout() = listOf(
         SMExercise(
             prettyName = "Jumping Jacks",
