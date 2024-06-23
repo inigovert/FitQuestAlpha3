@@ -94,20 +94,6 @@
         app:layout_constraintTop_toBottomOf="@+id/otherButtonContainer"
         app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/pointsTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Points: 0"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/upperBodyButton"
-        app:layout_constraintVertical_bias="1.0" />
-
     <Button
         android:id="@+id/coreButton"
         android:layout_width="wrap_content"
@@ -148,7 +134,7 @@
         android:id="@+id/dailyProgressMonitorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Workouts Done: 0/4"
+        android:text="Completed Workouts Today: 0/4"
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/upperBodyButton"
         app:layout_constraintEnd_toEndOf="parent"
