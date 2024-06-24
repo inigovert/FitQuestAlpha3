@@ -29,7 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import java.time.ZoneOffset
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
-
+import java.util.UUID
 
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
@@ -232,6 +232,27 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         // Update points in Firestore
         updatePointsInFirestore(points)
     }
+    fun onFinishSession(summary: WorkoutSummaryData) {
+        Log.d(tag, "onFinishExercise $summary")
+        val exercises = summary.exercises
+        val totalExercises = exercises.size
+        var totalScore = 0f
+
+        // Calculate and log individual exercise scores
+        for (exercise in exercises) {
+            val exerciseScore = exercise.totalScore
+            Log.d(tag, "Exercise ${exercise.prettyName}: Score = $exerciseScore")
+            totalScore += exerciseScore
+        }
+
+        val averageScore = if (totalExercises > 0) totalScore / totalExercises else 0f
+        val points = calculatePoints(averageScore)
+
+        Log.d(tag, "Average Score: $averageScore, Points: $points")
+
+        // Update points in Firestore
+        updatePointsInFirestore(points)
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateDailyTrackerUI() {
         val today = LocalDate.now().format(formatter)
@@ -274,7 +295,16 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private fun updatePointsInFirestore(points: Int) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        var userId = FirebaseAuth.getInstance().currentUser?.uid
+        if(userId == null) {
+            userId = sharedPreferences.getString("userId", null)
+
+            // if the userId in SharedPreferences is also null, generate a new one and save to SharedPreferences
+            if(userId == null) {
+                userId = UUID.randomUUID().toString()
+                sharedPreferences.edit().putString("userId", userId).apply()
+            }
+        }
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
             userRef.update("points", FieldValue.increment(points.toDouble()))
