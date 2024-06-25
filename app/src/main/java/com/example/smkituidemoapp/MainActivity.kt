@@ -104,9 +104,9 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     @RequiresApi(Build.VERSION_CODES.O)
     //CLICKLISTENERS | BUTTON MAPPINGS
     private fun setClickListeners() {
-        binding.startAssessment.setOnClickListener {
-            smKitUI?.startAssessment(this)
-        }
+//        binding.startAssessment.setOnClickListener { //assessment/demo button
+//            smKitUI?.startAssessment(this)
+//        }
 
         binding.upperBodyButton.setOnClickListener {
             smKitUI?.let {
@@ -173,15 +173,16 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             }
         }
 
-        binding.profileButton.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-        binding.bmiCalculatorButton.setOnClickListener {
-            startActivity(Intent(this, BMICalculatorActivity::class.java))
-        }
-        binding.rewardsButton.setOnClickListener{
-            startActivity(Intent(this, RewardsActivity::class.java))
-        }
+        //put these in bottom navbar
+//        binding.profileButton.setOnClickListener {
+//            startActivity(Intent(this, ProfileActivity::class.java))
+//        }
+//        binding.bmiCalculatorButton.setOnClickListener {
+//            startActivity(Intent(this, BMICalculatorActivity::class.java))
+//        }
+//        binding.rewardsButton.setOnClickListener{
+//            startActivity(Intent(this, RewardsActivity::class.java))
+//        }
     }
     private fun requestPermissions() {
         if (!hasPermissions(baseContext)) {
@@ -350,7 +351,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 if (document.exists()) {
                     val completedWorkoutsToday = document.getLong("workoutsCompleted") ?: 0
                     val totalWorkoutCount = 4
-                    binding.dailyProgressMonitorTextView.text = "Completed Workouts Today: $completedWorkoutsToday/$totalWorkoutCount"
+                   // binding.dailyProgressMonitorTextView.text = "Completed Workouts Today: $completedWorkoutsToday/$totalWorkoutCount" //tracker goes here
                 } else {
                     Log.d(tag, "Error fetching completed workouts")
                 }
