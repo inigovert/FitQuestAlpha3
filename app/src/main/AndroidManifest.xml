@@ -22,6 +22,8 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
         </activity>
+
+        <activity android:name=".ExerciseListActivity" />
         <activity android:name=".BMICalculatorActivity" />
         <activity android:name=".ChooseWorkoutActivity" />
         <activity android:name=".LoginActivity"
