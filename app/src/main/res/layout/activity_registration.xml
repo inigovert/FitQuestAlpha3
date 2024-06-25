@@ -67,12 +67,12 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/lastNameTextInput"
-            android:layout_width="match_parent"
-            android:hint="Last Name"
+            android:layout_width="148dp"
             android:layout_height="wrap_content"
+            android:hint="Last Name"
             android:inputType="textPersonName"
             android:textColor="@color/white"
-            android:textColorHint="@color/white"/>
+            android:textColorHint="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout

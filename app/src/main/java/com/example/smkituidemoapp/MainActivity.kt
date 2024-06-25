@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.upperBodyButton.setOnClickListener {
             smKitUI?.let {
                 val smWorkout = SMWorkout(
-                    id = "upperBody",
+                    id = "upperBody",   
                     name = "Upper Body Workout",
                     workoutIntro = "",
                     soundtrack = "soundtrack_7",

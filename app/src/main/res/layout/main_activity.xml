@@ -4,17 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="@drawable/bghome2"
     android:padding="24dp">
-
-    <ImageView
-        android:id="@+id/appLogo"
-        android:layout_width="362dp"
-        android:layout_height="129dp"
-        android:src="@drawable/logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 
     <LinearLayout
@@ -22,11 +13,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="28dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appLogo">
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/startAssessment"
@@ -113,22 +103,21 @@
         android:text="Leg Workout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coreButton"
-        app:layout_constraintVertical_bias="0.091" />
+        app:layout_constraintVertical_bias="0.636" />
 
     <Button
         android:id="@+id/cardioButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cardio Workout"
+        android:layout_width="363dp"
+        android:layout_height="119dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/legsButton"
-        app:layout_constraintVertical_bias="0.099" />
+        app:layout_constraintVertical_bias="0.673" />
 
     <TextView
         android:id="@+id/dailyProgressMonitorTextView"
