@@ -73,51 +73,57 @@
 
     <Button
         android:id="@+id/upperBodyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="375dp"
+        android:layout_height="130dp"
         android:layout_marginTop="73dp"
-        android:text="Upper Body Workout"
+        android:background="#00000000"
+        android:backgroundTint="#00FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.416"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/otherButtonContainer"
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/coreButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Core Workout"
+        android:layout_width="370dp"
+        android:layout_height="124dp"
+        android:background="#00000000"
+        android:backgroundTint="#00FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/upperBodyButton"
-        app:layout_constraintVertical_bias="0.048" />
+        app:layout_constraintVertical_bias="0.099" />
 
     <Button
         android:id="@+id/legsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Leg Workout"
+        android:layout_width="363dp"
+        android:layout_height="132dp"
+        android:background="#00000000"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coreButton"
-        app:layout_constraintVertical_bias="0.636" />
+        app:layout_constraintVertical_bias="0.131" />
+
 
     <Button
         android:id="@+id/cardioButton"
-        android:layout_width="363dp"
-        android:layout_height="119dp"
+        android:layout_width="370dp"
+        android:layout_height="123dp"
+        android:background="#00000000"
+        android:backgroundTint="#00000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/legsButton"
-        app:layout_constraintVertical_bias="0.673" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/dailyProgressMonitorTextView"
@@ -128,6 +134,7 @@
         app:layout_constraintBottom_toTopOf="@+id/upperBodyButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/otherButtonContainer" />
+        app:layout_constraintTop_toBottomOf="@+id/otherButtonContainer"
+        app:layout_constraintVertical_bias="0.277" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
