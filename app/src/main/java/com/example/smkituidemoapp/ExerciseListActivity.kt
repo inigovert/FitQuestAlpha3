@@ -21,6 +21,7 @@ class ExerciseListActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exercises)
         exerciseListView.adapter = adapter
 
+
         startWorkoutButton.setOnClickListener {
             setResult(RESULT_OK, intent.putExtra("workoutId", workoutId))
             finish()

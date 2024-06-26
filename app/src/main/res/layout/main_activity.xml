@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
+    android:background="@drawable/bghome2"
     android:padding="24dp">
 
 
     <ImageButton
         android:id="@+id/upperBodyButton"
-        android:layout_width="232dp"
-        android:layout_height="106dp"
+        android:layout_width="387dp"
+        android:layout_height="128dp"
         android:background="@null"
         android:scaleType="centerInside"
 
@@ -20,54 +20,47 @@
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.261"
-        app:srcCompat="@drawable/upperbody" />
+        app:layout_constraintVertical_bias="0.261" />
 
     <ImageButton
         android:id="@+id/coreButton"
-        android:layout_width="232dp"
-        android:layout_height="106dp"
+        android:layout_width="394dp"
+        android:layout_height="124dp"
         android:background="@null"
-        android:scaleType="centerInside"
 
+        android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintHorizontal_bias="0.516"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/upperBodyButton"
-        app:layout_constraintVertical_bias="0.023"
-        app:srcCompat="@drawable/core" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.518" />
 
     <ImageButton
         android:id="@+id/legsButton"
-        android:layout_width="232dp"
-        android:layout_height="106dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="387dp"
+        android:layout_height="115dp"
         android:background="@null"
 
         android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/coreButton"
-        app:layout_constraintVertical_bias="0.034"
-        app:srcCompat="@drawable/legs" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.761" />
 
     <ImageButton
         android:id="@+id/cardioButton"
-        android:layout_width="232dp"
-        android:layout_height="106dp"
+        android:layout_width="395dp"
+        android:layout_height="115dp"
         android:background="@null"
         android:scaleType="centerInside"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/legsButton"
-        app:layout_constraintVertical_bias="0.13"
-        app:srcCompat="@drawable/cardio" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/imageView5"
