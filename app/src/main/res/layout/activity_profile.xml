@@ -22,7 +22,7 @@
         android:id="@+id/goToLoginButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="#161A30"
+        android:backgroundTint="@color/primary_color"
         android:text="Log In"
         android:textColor="#F0ECE5"
         app:layout_constraintBottom_toBottomOf="parent"

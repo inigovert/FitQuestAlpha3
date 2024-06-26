@@ -7,9 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="primary_color">#161A30</color>
-    <color name="secondary_color">#31304D</color>
-    <color name="button_color">#31304D</color>
+    <color name="primary_color">#373A40</color>
+    <color name="secondary_color">#686D76</color>
+    <color name="button_color">#373A40</color>
     <color name="end_color">#373A40</color>
     <color name="start_color">#686D76</color>
     <color name="middle_color">#373A40</color>
