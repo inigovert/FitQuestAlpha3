@@ -90,5 +90,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu" />
+        app:menu="@menu/bottom_nav_menu"
+        android:background="#373A40"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
