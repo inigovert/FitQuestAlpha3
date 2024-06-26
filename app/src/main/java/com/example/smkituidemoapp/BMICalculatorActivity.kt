@@ -1,11 +1,13 @@
 package com.example.smkituidemoapp
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.smkituidemoapp.databinding.ActivityBmiCalculatorBinding
 
 class BMICalculatorActivity : AppCompatActivity() {
 
@@ -13,12 +15,46 @@ class BMICalculatorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bmi_calculator)
 
+        lateinit var binding: ActivityBmiCalculatorBinding
+
+        binding = ActivityBmiCalculatorBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         val heightInput: EditText = findViewById(R.id.heightTextInput)
         val weightInput: EditText = findViewById(R.id.weightTextInput)
         val resultText: TextView =
             findViewById(R.id.resultText) // Add a TextView in your layout for the result
         val calculateButton: Button =
             findViewById(R.id.calculateButton) // Add a Button in your layout
+
+        val bottomNavigationView = binding.bottomNavigation
+
+        // Handle navigation item clicks
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.homeFragment -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    true
+                }
+
+                R.id.profileFragment -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+
+                R.id.rewardsFragment -> {
+                    startActivity(Intent(this, RewardsActivity::class.java))
+                    true
+                }
+
+                R.id.bmiFragment -> {
+                    startActivity(Intent(this, BMICalculatorActivity::class.java))
+                    true
+                }
+
+                else -> false
+            }
+        }
 
         calculateButton.setOnClickListener {
 

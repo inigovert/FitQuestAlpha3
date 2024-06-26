@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_profile"
+        android:title="Log Out" />
+    <item
+        android:id="@+id/rewardsFragment"
+        android:icon="@drawable/ic_reward"
+        android:title="Rewards" />
+    <item
+        android:id="@+id/bmiFragment"
+        android:icon="@drawable/statistics"
+        android:title="BMI" />
+</menu>

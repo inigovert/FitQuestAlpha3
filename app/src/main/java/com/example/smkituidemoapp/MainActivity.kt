@@ -100,7 +100,36 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         requestPermissions()
         setClickListeners()
         resetWorkoutCounterInFirestore()
+        val bottomNavigationView = binding.bottomNavigation
+
+        // Handle navigation item clicks
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.homeFragment -> {
+                    // ...
+                    true
+                }
+
+                R.id.profileFragment -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+
+                R.id.rewardsFragment -> {
+                    startActivity(Intent(this, RewardsActivity::class.java))
+                    true
+                }
+
+                R.id.bmiFragment -> {
+                    startActivity(Intent(this, BMICalculatorActivity::class.java))
+                    true
+                }
+
+                else -> false
+            }
+        }
     }
+
 
     private fun setClickListeners() {
         binding.upperBodyButton.setOnClickListener {
@@ -115,6 +144,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.cardioButton.setOnClickListener {
             navigateToExerciseList("cardio", "Cardio Workout", viewModel.cardioWorkout())
         }
+
     }
 
     private fun navigateToExerciseList(workoutId: String, workoutName: String, exercises: List<SMExercise>) {
@@ -126,6 +156,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
         exerciseListActivityLauncher.launch(intent)
     }
+
 
     private fun startWorkout(workoutId: String?) {
         smKitUI?.let {
