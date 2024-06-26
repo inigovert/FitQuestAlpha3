@@ -10,8 +10,8 @@
     <color name="primary_color">#161A30</color>
     <color name="secondary_color">#31304D</color>
     <color name="button_color">#31304D</color>
-    <color name="end_color">#161A30</color>
-    <color name="start_color">#161A30</color>
-    <color name="middle_color">#31304D</color>
+    <color name="end_color">#112D4E</color>
+    <color name="start_color">#3F72AF</color>
+    <color name="middle_color">#112D4E</color>
 
 </resources>
