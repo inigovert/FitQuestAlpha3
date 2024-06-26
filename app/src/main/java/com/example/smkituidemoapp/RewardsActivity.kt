@@ -43,10 +43,10 @@ class RewardsActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.rewardsFragment -> {
-                    startActivity(Intent(this, RewardsActivity::class.java))
-                    true
-                }
+//                R.id.rewardsFragment -> {
+//                    startActivity(Intent(this, RewardsActivity::class.java))
+//                    true
+//                }
 
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))

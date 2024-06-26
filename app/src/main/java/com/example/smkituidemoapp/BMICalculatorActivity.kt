@@ -47,10 +47,10 @@ class BMICalculatorActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.bmiFragment -> {
-                    startActivity(Intent(this, BMICalculatorActivity::class.java))
-                    true
-                }
+//                R.id.bmiFragment -> {
+//                    startActivity(Intent(this, BMICalculatorActivity::class.java))
+//                    true
+//                }
 
                 else -> false
             }
