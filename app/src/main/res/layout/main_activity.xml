@@ -10,7 +10,7 @@
         android:id="@+id/upperBodyButton"
         android:layout_width="250dp"
         android:layout_height="125dp"
-        android:layout_marginTop="112dp"
+        android:layout_marginTop="96dp"
         android:background="@drawable/upperbody"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,7 +65,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.851"
+        app:layout_constraintVertical_bias="0.617"
         app:srcCompat="@drawable/logo_text" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -79,5 +79,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
+    <TextView
+        android:id="@+id/dailyProgressMonitorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Completed Workouts Today:"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.295"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardioButton" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

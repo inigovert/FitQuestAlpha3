@@ -52,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="8dp"
         android:hint="@string/password_hint"
         app:boxBackgroundColor="@color/transparent"
         app:endIconMode="password_toggle"

@@ -30,6 +30,7 @@ import java.time.ZoneOffset
 import com.google.firebase.firestore.FieldValue
 import java.util.UUID
 import android.app.Activity
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import com.sency.smkitui.model.SMExercise
 
@@ -41,6 +42,12 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     private var resetTime: Long = 0
 
     private lateinit var sharedPreferences: SharedPreferences
+
+    private var completedWorkouts = 0
+
+    private val totalWorkouts = 4 // Set the total number of workouts per day
+
+    private lateinit var dailyProgressTextView: TextView
 
     private lateinit var db: FirebaseFirestore
 
@@ -93,48 +100,46 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
             sharedPreferences.edit().putBoolean("updatedToday", false).apply()
             resetTime = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
             sharedPreferences.edit().putLong("resetTime", resetTime).apply()
+            resetWorkoutCounter()
         }
 
-        updateDailyTrackerUI()
+        dailyProgressTextView = findViewById(R.id.dailyProgressMonitorTextView)
+
+        // Load workout data from Firestore
+        loadUserData()
+
         requestPermissions()
         setClickListeners()
-        resetWorkoutCounterInFirestore()
+
         val bottomNavigationView = binding.bottomNavigation
 
-        // Handle navigation item clicks
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {
                     // ...
                     true
                 }
-
                 R.id.profileFragment -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
-
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
                     true
                 }
-
                 R.id.rewardsFragment -> {
                     val currentUser = FirebaseAuth.getInstance().currentUser
                     if (currentUser != null) {
                         startActivity(Intent(this, RewardsActivity::class.java))
                     } else {
                         Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
-                        // Redirect to login page if necessary
                     }
                     true
                 }
-
                 else -> false
             }
         }
     }
-
 
     private fun setClickListeners() {
         binding.upperBodyButton.setOnClickListener {
@@ -149,7 +154,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         binding.cardioButton.setOnClickListener {
             navigateToExerciseList("cardio", "Cardio Workout", viewModel.cardioWorkout())
         }
-
     }
 
     private fun navigateToExerciseList(workoutId: String, workoutName: String, exercises: List<SMExercise>) {
@@ -161,7 +165,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
         exerciseListActivityLauncher.launch(intent)
     }
-
 
     private fun startWorkout(workoutId: String?) {
         smKitUI?.let {
@@ -244,11 +247,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     override fun workoutDidFinish(summary: WorkoutSummaryData) {
         Log.d(tag, "workoutDidFinish: $summary")
 
-        if (!sharedPreferences.getBoolean("updatedToday", false)) {
-            incrementWorkoutCounter()
-            sharedPreferences.edit().putBoolean("updatedToday", true).apply()
-        }
-
         val exercises = summary.exercises
         val totalExercises = exercises.size
         var totalScore = 0f
@@ -265,76 +263,44 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         Log.d(tag, "Average Score: $averageScore, Points: $points")
 
         updatePointsInFirestore(points)
+
+        // Increment the completed workouts counter
+        completedWorkouts++
+        sharedPreferences.edit().putInt("completedWorkouts", completedWorkouts).apply()
+        updateDailyProgressText()
+
+        // Update the workout counter in Firestore
+        updateWorkoutCounterInFirestore(completedWorkouts)
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateDailyTrackerUI() {
-        val today = LocalDate.now().format(formatter)
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-        if (userId != null) {
-            initializeWorkoutCounter(userId)
-            fetchAndDisplayCompletedWorkouts(userId, today)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun incrementWorkoutCounter() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-
+    private fun updateWorkoutCounterInFirestore(completedWorkouts: Int) {
+        val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
-
-            Log.d(tag, "Increment Workout Counter: Checking if updatedToday is false.")
-
-            if (!sharedPreferences.getBoolean("updatedToday", false)) {
-                userRef.update("workoutsCompleted", FieldValue.increment(1))
-                    .addOnSuccessListener {
-                        Log.d(tag, "Incremented workoutsCompleted for user: $userId")
-                        fetchAndDisplayCompletedWorkouts(userId, LocalDate.now().format(formatter))
-                        sharedPreferences.edit().putBoolean("updatedToday", true).apply()
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.e(tag, "Error incrementing workoutsCompleted", exception)
-                        showToast("Error updating workout count")
-                    }
-            } else {
-                Log.d(tag, "Workout counter not incremented because updatedToday is true.")
-            }
+            userRef.update("completedWorkoutsToday", completedWorkouts)
+                .addOnSuccessListener {
+                    Log.d(tag, "Completed workouts updated in Firestore: $completedWorkouts")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(tag, "Error updating completed workouts in Firestore", e)
+                }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun initializeWorkoutCounter(userId: String) {
-        val userRef = db.collection("users").document(userId)
+    private fun resetWorkoutCounter() {
+        completedWorkouts = 0
+        sharedPreferences.edit().putInt("completedWorkouts", 0).apply()
+        updateDailyProgressText()
+        // Update Firestore
+        updateWorkoutCounterInFirestore(0)
+    }
 
-        userRef.get().addOnSuccessListener { document ->
-            if (!document.exists() || !document.contains("workoutsCompleted")) {
-                userRef.update("workoutsCompleted", 0)
-                    .addOnSuccessListener {
-                        Log.d(tag, "Initialized workoutsCompleted to 0 for user: $userId")
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.e(tag, "Error initializing workoutsCompleted field", exception)
-                        showToast("Error initializing workout count")
-                    }
-            }
-        }.addOnFailureListener { exception ->
-            Log.e(tag, "Error getting user document", exception)
-        }
+    private fun updateDailyProgressText() {
+        dailyProgressTextView.text = "Completed Workouts Today: $completedWorkouts/$totalWorkouts"
     }
 
     private fun updatePointsInFirestore(points: Int) {
-        var userId = FirebaseAuth.getInstance().currentUser?.uid
-        if(userId == null) {
-            userId = sharedPreferences.getString("userId", null)
-
-            if(userId == null) {
-                userId = UUID.randomUUID().toString()
-                sharedPreferences.edit().putString("userId", userId).apply()
-            }
-        }
+        val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
             userRef.update("points", FieldValue.increment(points.toDouble()))
@@ -357,40 +323,37 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private fun resetWorkoutCounterInFirestore() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-
+    private fun loadUserData() {
+        val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
-            userRef.update("workoutsCompleted", 0)
-                .addOnSuccessListener {
-                    Log.d(tag, "Workout counter reset in Firestore for user: $userId")
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        completedWorkouts = document.getLong("completedWorkoutsToday")?.toInt() ?: 0
+                        sharedPreferences.edit().putInt("completedWorkouts", completedWorkouts).apply()
+                        updateDailyProgressText()
+                    } else {
+                        Log.d(tag, "No such document")
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Log.e(tag, "Error resetting workout counter", e)
+                    Log.e(tag, "Error fetching document", e)
                 }
         }
     }
 
-    private fun fetchAndDisplayCompletedWorkouts(userId: String, today: String) {
-        db.collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val completedWorkoutsToday = document.getLong("workoutsCompleted") ?: 0
-                    val totalWorkoutCount = 4
-                    // binding.dailyProgressMonitorTextView.text = "Completed Workouts Today: $completedWorkoutsToday/$totalWorkoutCount"
-                } else {
-                    Log.d(tag, "Error fetching completed workouts")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e(tag, "Error getting user data: ", exception)
-            }
-    }
+    private fun getUserId(): String? {
+        var userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            userId = sharedPreferences.getString("userId", null)
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            if (userId == null) {
+                userId = UUID.randomUUID().toString()
+                sharedPreferences.edit().putString("userId", userId).apply()
+            }
+        }
+        return userId
     }
 
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
