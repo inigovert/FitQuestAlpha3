@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
+    android:background="@color/black"
     android:padding="24dp">
 
 
@@ -12,7 +12,7 @@
         android:id="@+id/upperBodyButton"
         android:layout_width="250dp"
         android:layout_height="125dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="104dp"
         android:background="@drawable/upperbody"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +47,7 @@
     <ImageButton
         android:id="@+id/cardioButton"
         android:layout_width="250dp"
-        android:layout_height="115dp"
+        android:layout_height="125dp"
         android:background="@drawable/cardio"
         android:scaleType="fitCenter"
 
@@ -79,7 +79,7 @@
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
 
