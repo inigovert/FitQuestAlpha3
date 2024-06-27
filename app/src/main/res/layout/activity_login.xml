@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
+    android:background="#28282B"
     android:padding="24dp">
 
     <ImageView
         android:id="@+id/appLogo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="304dp"
+        android:layout_height="109dp"
         android:layout_marginBottom="24dp"
         android:adjustViewBounds="true"
         android:src="@drawable/logo2"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:hint="@string/email_hint"
-        app:boxBackgroundColor="@color/secondary_color"
+        app:boxBackgroundColor="@color/transparent"
         app:endIconMode="clear_text"
         app:endIconTint="@color/white"
         app:hintTextColor="@color/white"
@@ -54,7 +54,7 @@
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="1dp"
         android:hint="@string/password_hint"
-        app:boxBackgroundColor="@color/secondary_color"
+        app:boxBackgroundColor="@color/transparent"
         app:endIconMode="password_toggle"
         app:endIconTint="@color/white"
         app:hintTextColor="@color/white"
@@ -86,6 +86,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passwordInputLayout"
         app:layout_constraintVertical_bias="0.4"
-        app:layout_constraintWidth_percent="0.8"/>
+        app:layout_constraintWidth_percent="0.8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

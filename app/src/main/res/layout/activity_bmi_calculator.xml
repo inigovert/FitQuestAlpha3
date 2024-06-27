@@ -61,10 +61,12 @@
     <Button
         android:id="@+id/calculateButton"
         style="@style/AppButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="224dp"
+        android:layout_height="50dp"
         android:layout_marginTop="32dp"
+        android:backgroundTint="@color/other_white"
         android:text="Calculate"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="@id/weightInputLayout"
         app:layout_constraintStart_toStartOf="@id/weightInputLayout"
         app:layout_constraintTop_toBottomOf="@id/weightInputLayout"
@@ -81,6 +83,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/calculateButton" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"

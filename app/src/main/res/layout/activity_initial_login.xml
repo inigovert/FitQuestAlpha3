@@ -20,8 +20,8 @@
 
     <Button
         android:id="@+id/goToLoginButton"
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
+        android:layout_width="357dp"
+        android:layout_height="48dp"
         android:backgroundTint="@color/primary_color"
         android:text="Log In"
         android:textColor="#F0ECE5"
@@ -35,8 +35,8 @@
     <Button
         android:id="@+id/goToRegisterButton"
         style="@style/AppButton"
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
+        android:layout_width="358dp"
+        android:layout_height="47dp"
         android:text="Sign Up"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,11 +47,10 @@
 
     <ImageView
         android:id="@+id/imageView6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_width="304dp"
+        android:layout_height="166dp"
+        android:layout_marginTop="96dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo2" />
