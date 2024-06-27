@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -37,6 +38,16 @@ class ProfileActivity : AppCompatActivity() {
                 }
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
+                    true
+                }
+                R.id.rewardsFragment -> {
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    if (currentUser != null) {
+                        startActivity(Intent(this, RewardsActivity::class.java))
+                    } else {
+                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
+                        // Redirect to login page if necessary
+                    }
                     true
                 }
                 else -> false
@@ -94,7 +105,6 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // Disable back button functionality after logout
         moveTaskToBack(true)
     }
 }

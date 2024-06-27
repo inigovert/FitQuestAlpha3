@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityBmiCalculatorBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class BMICalculatorActivity : AppCompatActivity() {
 
@@ -39,6 +41,16 @@ class BMICalculatorActivity : AppCompatActivity() {
 
                 R.id.profileFragment -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                R.id.rewardsFragment -> {
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    if (currentUser != null) {
+                        startActivity(Intent(this, RewardsActivity::class.java))
+                    } else {
+                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
+                        // Redirect to login page if necessary
+                    }
                     true
                 }
 

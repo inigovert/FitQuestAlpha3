@@ -119,6 +119,17 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                     true
                 }
 
+                R.id.rewardsFragment -> {
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    if (currentUser != null) {
+                        startActivity(Intent(this, RewardsActivity::class.java))
+                    } else {
+                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
+                        // Redirect to login page if necessary
+                    }
+                    true
+                }
+
                 else -> false
             }
         }

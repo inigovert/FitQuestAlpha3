@@ -3,13 +3,17 @@
     <item
         android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:title="Workouts" />
     <item
         android:id="@+id/profileFragment"
-        android:icon="@drawable/ic_reward"
+        android:icon="@drawable/ic_profile"
         android:title="Profile" />
     <item
         android:id="@+id/bmiFragment"
         android:icon="@drawable/statistics"
         android:title="BMI" />
+    <item
+        android:id="@+id/rewardsFragment"
+        android:icon="@drawable/ic_reward"
+        android:title="Rewards" />
 </menu>

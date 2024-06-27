@@ -1,7 +1,11 @@
 package com.example.smkituidemoapp
 
 data class Reward(
-    val rewardName: String,
-    val rewardDescription: String,
-    val requiredPoints: Long
+    var id: String = "",
+    var rewardName: String = "",
+    var rewardDescription: String = "",
+    var requiredPoints: Long = 0
 )
+
+
+
