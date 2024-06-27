@@ -110,11 +110,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 }
 
                 R.id.profileFragment -> {
-                    startActivity(Intent(this, InitialLoginActivity::class.java))
-                    true
-                }
-
-                R.id.rewardsFragment -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }

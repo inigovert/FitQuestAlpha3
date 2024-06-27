@@ -3,6 +3,7 @@ package com.example.smkituidemoapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityProfileBinding
@@ -79,5 +80,21 @@ class ProfileActivity : AppCompatActivity() {
             binding.emailTextView.text = "Email: Not Logged In"
             binding.pointsTextView.text = "Points: N/A"
         }
+
+        // Logout button functionality
+        val logoutButton: Button = findViewById(R.id.logoutButton)
+        logoutButton.setOnClickListener {
+            auth.signOut()
+            val logoutIntent = Intent(this, LoginActivity::class.java)
+            logoutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(logoutIntent)
+            finish()
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Disable back button functionality after logout
+        moveTaskToBack(true)
     }
 }

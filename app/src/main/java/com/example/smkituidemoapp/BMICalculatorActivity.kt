@@ -38,19 +38,10 @@ class BMICalculatorActivity : AppCompatActivity() {
                 }
 
                 R.id.profileFragment -> {
-                    startActivity(Intent(this, InitialLoginActivity::class.java))
-                    true
-                }
-
-                R.id.rewardsFragment -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
 
-//                R.id.bmiFragment -> {
-//                    startActivity(Intent(this, BMICalculatorActivity::class.java))
-//                    true
-//                }
 
                 else -> false
             }
