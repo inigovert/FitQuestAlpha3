@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 import java.time.ZoneOffset
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import java.util.UUID
 import android.app.Activity
@@ -111,12 +110,12 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 }
 
                 R.id.profileFragment -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    startActivity(Intent(this, InitialLoginActivity::class.java))
                     true
                 }
 
                 R.id.rewardsFragment -> {
-                    startActivity(Intent(this, RewardsActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
 
@@ -262,25 +261,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         updatePointsInFirestore(points)
     }
 
-    fun onFinishSession(summary: WorkoutSummaryData) {
-        Log.d(tag, "onFinishExercise $summary")
-        val exercises = summary.exercises
-        val totalExercises = exercises.size
-        var totalScore = 0f
-
-        for (exercise in exercises) {
-            val exerciseScore = exercise.totalScore
-            Log.d(tag, "Exercise ${exercise.prettyName}: Score = $exerciseScore")
-            totalScore += exerciseScore
-        }
-
-        val averageScore = if (totalExercises > 0) totalScore / totalExercises else 0f
-        val points = calculatePoints(averageScore)
-
-        Log.d(tag, "Average Score: $averageScore, Points: $points")
-
-        updatePointsInFirestore(points)
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateDailyTrackerUI() {

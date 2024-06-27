@@ -43,7 +43,7 @@ class MainViewModel : ViewModel() {
 //        ),
         SMExercise(
             prettyName = "Push Ups",
-            totalSeconds = 120,
+            totalSeconds = 15,
             introSeconds = 0,
             exerciseIntro = "0",
             videoInstruction = "PushupRegularInstructionVideo",
@@ -73,7 +73,7 @@ class MainViewModel : ViewModel() {
 //        ),
         SMExercise(
             prettyName = "Shoulder Taps Plank",
-            totalSeconds = 120,
+            totalSeconds = 15,
             introSeconds = 0,
             exerciseIntro = "",
             videoInstruction = "PlankHighShoulderTapsInstructionVideo",
