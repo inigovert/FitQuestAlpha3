@@ -6,8 +6,6 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -18,7 +16,7 @@
         android:theme="@style/Theme.SMKitUIDemoApp"
         tools:targetApi="31"
         tools:ignore="ExtraText">
-        <activity android:name=".InitialLoginActivity" android:exported="true">
+        <activity android:name=".ProfileActivity" android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -39,7 +37,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"/>
-        <activity android:name=".ProfileActivity"/>
+        <activity android:name=".InitialLoginActivity"/>
         <activity
             android:name=".MainActivity"
             android:label=""

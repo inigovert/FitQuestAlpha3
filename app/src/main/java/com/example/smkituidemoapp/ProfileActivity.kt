@@ -96,7 +96,7 @@ class ProfileActivity : AppCompatActivity() {
         val logoutButton: Button = findViewById(R.id.logoutButton)
         logoutButton.setOnClickListener {
             auth.signOut()
-            val logoutIntent = Intent(this, LoginActivity::class.java)
+            val logoutIntent = Intent(this, InitialLoginActivity::class.java)
             logoutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(logoutIntent)
             finish()
