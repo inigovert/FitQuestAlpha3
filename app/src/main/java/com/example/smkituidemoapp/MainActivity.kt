@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     private lateinit var db: FirebaseFirestore
 
     private var _binding: MainActivityBinding? = null
+
     private val binding get() = _binding!!
 
     private val viewModel: MainViewModel by viewModels()
@@ -107,7 +108,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         // Load workout data from Firestore
         loadUserData()
-
         requestPermissions()
         setClickListeners()
 
