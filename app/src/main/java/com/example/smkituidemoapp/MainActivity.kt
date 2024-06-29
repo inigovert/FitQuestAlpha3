@@ -89,6 +89,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        dailyProgressTextView = findViewById(R.id.dailyProgressMonitorTextView)
+
         db = FirebaseFirestore.getInstance()
 
         sharedPreferences = getSharedPreferences("workout_tracker", Context.MODE_PRIVATE)

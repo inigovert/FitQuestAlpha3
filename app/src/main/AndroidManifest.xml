@@ -26,8 +26,8 @@
         <activity android:name=".ExerciseListActivity" />
         <activity android:name=".RewardsActivity" />
         <activity android:name=".BMICalculatorActivity" />
-        <activity android:name=".ChooseWorkoutActivity" />
         <activity android:name=".LoginActivity"
+
             android:theme="@style/AppTheme"/>
         <activity android:name=".RegistrationActivity"
             android:theme="@style/AppTheme"/>
