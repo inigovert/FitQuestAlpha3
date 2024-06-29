@@ -7,7 +7,7 @@
     <style name="AppButton">
         <item name="android:backgroundTint">@color/button_color</item>
         <item name="android:textColor">@android:color/white</item>
-        
     </style>
+
 
 </resources>

@@ -24,6 +24,7 @@ class ProfileActivity : AppCompatActivity() {
         val currentUser = auth.currentUser
 
         val bottomNavigationView = binding.bottomNavigation
+        bottomNavigationView.itemIconTintList = null // Remove icon tint list
 
         // Handle navigation item clicks
         bottomNavigationView.setOnItemSelectedListener { item ->
@@ -33,7 +34,6 @@ class ProfileActivity : AppCompatActivity() {
                     true
                 }
                 R.id.profileFragment -> {
-                    startActivity(Intent(this, InitialLoginActivity::class.java))
                     true
                 }
                 R.id.bmiFragment -> {

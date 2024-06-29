@@ -32,6 +32,8 @@ import java.util.UUID
 import android.app.Activity
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
 import com.sency.smkitui.model.SMExercise
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
@@ -86,6 +88,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -114,25 +117,27 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         setClickListeners()
 
         val bottomNavigationView = binding.bottomNavigation
-
+        bottomNavigationView.itemIconTintList = null // Remove icon tint list
         bottomNavigationView.setOnItemSelectedListener { item -> //navbar
             when (item.itemId) {
                 R.id.homeFragment -> {
-                    // ...
                     true
                 }
                 R.id.profileFragment -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     true
                 }
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     true
                 }
                 R.id.rewardsFragment -> {
                     val currentUser = FirebaseAuth.getInstance().currentUser
                     if (currentUser != null) {
                         startActivity(Intent(this, RewardsActivity::class.java))
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     } else {
                         Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
                     }
@@ -141,6 +146,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 else -> false
             }
         }
+
     }
 
     private fun setClickListeners() {
@@ -245,6 +251,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     override fun handleWorkoutErrors(error: Error) {
         Log.d(tag, "handleWorkoutErrors: $error")
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun workoutDidFinish(summary: WorkoutSummaryData) { //handles events upon finishing the workout

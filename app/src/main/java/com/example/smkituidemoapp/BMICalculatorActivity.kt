@@ -30,6 +30,7 @@ class BMICalculatorActivity : AppCompatActivity() {
             findViewById(R.id.calculateButton) // Add a Button in your layout
 
         val bottomNavigationView = binding.bottomNavigation
+        bottomNavigationView.itemIconTintList = null // Remove icon tint list
 
         // Handle navigation item clicks
         bottomNavigationView.setOnItemSelectedListener { item ->

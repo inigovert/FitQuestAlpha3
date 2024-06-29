@@ -23,6 +23,8 @@ class RewardsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRewardsBinding.inflate(layoutInflater)
+        val bottomNavigationView = binding.bottomNavigation
+        bottomNavigationView.itemIconTintList = null // Remove icon tint list
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
@@ -40,11 +42,13 @@ class RewardsActivity : AppCompatActivity() {
         setupBottomNavigationBar()
     }
 
+
     private fun setupBottomNavigationBar() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {
                     startActivity(Intent(this, MainActivity::class.java))
+
                     true
                 }
                 R.id.profileFragment -> {

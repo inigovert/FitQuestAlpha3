@@ -43,7 +43,7 @@ class MainViewModel : ViewModel() {
 //        ),
         SMExercise(
             prettyName = "Push Ups",
-            totalSeconds = 15,
+            totalSeconds = 60,
             introSeconds = 0,
             exerciseIntro = "0",
             videoInstruction = "PushupRegularInstructionVideo",
@@ -73,7 +73,7 @@ class MainViewModel : ViewModel() {
 //        ),
         SMExercise(
             prettyName = "Shoulder Taps Plank",
-            totalSeconds = 15,
+            totalSeconds = 60,
             introSeconds = 0,
             exerciseIntro = "",
             videoInstruction = "PlankHighShoulderTapsInstructionVideo",
@@ -291,8 +291,4 @@ class MainViewModel : ViewModel() {
             passCriteria = null,
         )
     )
-
-    fun updateExercisePoints(points: Int) {
-        _exercisePoints.postValue(points)
-    }
 }
