@@ -37,9 +37,9 @@ import com.sency.smkitui.model.SMExercise
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") //formatting dates for Completed Workouts Today Counter
 
-    private var resetTime: Long = 0
+    private var resetTime: Long = 0 //24 hour resetter
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -55,15 +55,15 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     private val binding get() = _binding!!
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()  //workout model
 
-    private var smKitUI: SMKitUI? = null
+    private var smKitUI: SMKitUI? = null //sency motion
 
     private val tag = this::class.java.simpleName
 
-    private val apiPublicKey = "public_live_BrYk+UxJaahIPdnb"
+    private val apiPublicKey = "public_live_BrYk+UxJaahIPdnb" //API key
 
-    private val configurationResult = object : ConfigurationResult {
+    private val configurationResult = object : ConfigurationResult { //has to configure first before loading the app
         override fun onFailure() {
             viewModel.setConfigured(false)
             Log.d(tag, "failed to configure")
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private val exerciseListActivityLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+    private val exerciseListActivityLauncher = registerForActivityResult(StartActivityForResult()) { result -> //workout launcher
         if (result.resultCode == Activity.RESULT_OK) {
             val workoutId = result.data?.getStringExtra("workoutId")
             startWorkout(workoutId)
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         dailyProgressTextView = findViewById(R.id.dailyProgressMonitorTextView)
 
-        db = FirebaseFirestore.getInstance()
+        db = FirebaseFirestore.getInstance() //database initialization
 
         sharedPreferences = getSharedPreferences("workout_tracker", Context.MODE_PRIVATE)
 
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         val bottomNavigationView = binding.bottomNavigation
 
-        bottomNavigationView.setOnItemSelectedListener { item ->
+        bottomNavigationView.setOnItemSelectedListener { item -> //navbar
             when (item.itemId) {
                 R.id.homeFragment -> {
                     // ...
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private fun setClickListeners() {
-        binding.upperBodyButton.setOnClickListener {
+        binding.upperBodyButton.setOnClickListener { //workout categories
             navigateToExerciseList("upperBody", "Upper Body Workout", viewModel.upperBodyWorkout())
         }
         binding.coreButton.setOnClickListener {
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         exerciseListActivityLauncher.launch(intent)
     }
 
-    private fun startWorkout(workoutId: String?) {
+    private fun startWorkout(workoutId: String?) { //maps the workouts
         smKitUI?.let {
             val workout = when (workoutId) {
                 "upperBody" -> SMWorkout(
@@ -235,6 +235,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     override fun didExitWorkout(summary: WorkoutSummaryData) {
         Log.d(tag, "didExitWorkout: $summary")
+        Toast.makeText(baseContext, "Workout Stopped", Toast.LENGTH_SHORT).show()
     }
 
     override fun exerciseDidFinish(data: ExerciseData) {
@@ -246,7 +247,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun workoutDidFinish(summary: WorkoutSummaryData) {
+    override fun workoutDidFinish(summary: WorkoutSummaryData) { //handles events upon finishing the workout
         Log.d(tag, "workoutDidFinish: $summary")
 
         val exercises = summary.exercises
@@ -273,9 +274,10 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         // Update the workout counter in Firestore
         updateWorkoutCounterInFirestore(completedWorkouts)
+        Toast.makeText(baseContext, "Points Collected: $points!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateWorkoutCounterInFirestore(completedWorkouts: Int) {
+    private fun updateWorkoutCounterInFirestore(completedWorkouts: Int) { //update daily workout counter
         val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
@@ -289,7 +291,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private fun resetWorkoutCounter() {
+    private fun resetWorkoutCounter() { //resets counter
         completedWorkouts = 0
         sharedPreferences.edit().putInt("completedWorkouts", 0).apply()
         updateDailyProgressText()
@@ -301,7 +303,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         dailyProgressTextView.text = "Completed Workouts Today: $completedWorkouts/$totalWorkouts"
     }
 
-    private fun updatePointsInFirestore(points: Int) {
+    private fun updatePointsInFirestore(points: Int) { //updates points in database upon finishing the workout
         val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
@@ -317,7 +319,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     private fun calculatePoints(averageScore: Float): Int {
         return when {
-            averageScore >= 90 -> 50
+            averageScore >= 90 -> 50 //possible points depending on performance
             averageScore >= 80 -> 40
             averageScore >= 70 -> 30
             averageScore >= 60 -> 20
@@ -325,7 +327,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private fun loadUserData() {
+    private fun loadUserData() { //loads user data from database
         val userId = getUserId()
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
