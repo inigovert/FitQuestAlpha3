@@ -86,9 +86,8 @@
         android:layout_width="81dp"
         android:layout_height="39dp"
         android:layout_marginTop="76dp"
-        android:backgroundTint="@color/white"
         android:text="Log out"
-        android:textColor="@color/black"
+        style="@style/AppButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pointsTextView" />
