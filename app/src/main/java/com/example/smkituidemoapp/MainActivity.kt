@@ -281,6 +281,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         // Update the workout counter in Firestore
         updateWorkoutCounterInFirestore(completedWorkouts)
+
+        //display points collected
         Toast.makeText(baseContext, "Points Collected: $points!", Toast.LENGTH_SHORT).show()
     }
 
