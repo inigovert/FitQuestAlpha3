@@ -93,6 +93,7 @@
         android:id="@+id/Gymspinner"
         android:layout_width="361dp"
         android:layout_height="23dp"
+
         app:layout_constraintBottom_toTopOf="@+id/registerButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
