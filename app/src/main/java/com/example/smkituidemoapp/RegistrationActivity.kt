@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityRegistrationBinding
@@ -13,11 +14,20 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
+data class Gym(
+    val name: String = "",
+    val location: String = ""
+)
+
 class RegistrationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegistrationBinding // Use view binding
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+
+    private lateinit var Gymspinner: Spinner
+    private lateinit var gyms: List<Gym>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +36,8 @@ class RegistrationActivity : AppCompatActivity() {
 
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
+
+        Gymspinner = binding.Gymspinner
 
         binding.registerButton.setOnClickListener {
             val firstName = binding.firstNameTextInput.text.toString().trim()

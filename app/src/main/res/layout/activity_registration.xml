@@ -80,7 +80,7 @@
         android:id="@+id/registerButton"
         android:layout_width="234dp"
         android:layout_height="43dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="228dp"
         android:backgroundTint="@color/other_white"
         android:text="Register"
         android:textColor="@color/black"
@@ -88,5 +88,16 @@
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/confirmPasswordTextInput" />
+
+    <Spinner
+        android:id="@+id/Gymspinner"
+        android:layout_width="361dp"
+        android:layout_height="23dp"
+        app:layout_constraintBottom_toTopOf="@+id/registerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirmPasswordTextInput"
+        app:layout_constraintVertical_bias="0.404" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
