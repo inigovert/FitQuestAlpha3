@@ -52,7 +52,7 @@ class RegistrationActivity : AppCompatActivity() {
             } else if (password != confirmPassword) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
             } else {
-                createAccount(firstName, lastName, email, password, selectedGym)
+                generateMemberIdAndCreateAccount(firstName, lastName, email, password, selectedGym)
             }
         }
     }
@@ -74,7 +74,29 @@ class RegistrationActivity : AppCompatActivity() {
             }
     }
 
-    private fun createAccount(firstName: String, lastName: String, email: String, password: String, gym: Gym) {
+    private fun generateMemberIdAndCreateAccount(firstName: String, lastName: String, email: String, password: String, gym: Gym) {
+        val memberRef = db.collection("Gym").document(gym.id).collection("Members")
+
+        memberRef.get().addOnSuccessListener { result ->
+            val existingIds = result.map { it.id }
+            val newId = generateNextId(existingIds)
+
+            createAccount(firstName, lastName, email, password, gym, newId)
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "Failed to generate member ID. ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun generateNextId(existingIds: List<String>): String {
+        val prefix = "U"
+        val maxId = existingIds
+            .filter { it.startsWith(prefix) }
+            .mapNotNull { it.removePrefix(prefix).toIntOrNull() }
+            .maxOrNull() ?: 0
+        return "$prefix${String.format("%03d", maxId + 1)}"
+    }
+
+    private fun createAccount(firstName: String, lastName: String, email: String, password: String, gym: Gym, memberId: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -85,13 +107,12 @@ class RegistrationActivity : AppCompatActivity() {
                         .build()
                     user?.updateProfile(profileUpdates)?.addOnCompleteListener {
                         val memberRef = db.collection("Gym").document(gym.id)
-                            .collection("Members").document("Users").collection("users").document(user!!.uid)
+                            .collection("Members").document(memberId)
                         val userData = hashMapOf(
-                            "firstName" to firstName,
-                            "lastName" to lastName,
-                            "email" to email,
-                            "gymName" to gym.Name,
-                            "gymLocation" to gym.Location
+                            "First Name" to firstName,
+                            "Last Name" to lastName,
+                            "Email" to email,
+                            "Status" to "Active User" // Change this value as needed
                         )
                         memberRef.set(userData)
                             .addOnSuccessListener {
