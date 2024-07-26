@@ -39,7 +39,8 @@ import com.sency.smkitui.model.SMExercise
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd") //formatting dates for Completed Workouts Today Counter
+    private val formatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd") //formatting dates for Completed Workouts Today Counter
 
     private var resetTime: Long = 0 //24 hour resetter
 
@@ -65,24 +66,26 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     private val apiPublicKey = "public_live_BrYk+UxJaahIPdnb" //API key
 
-    private val configurationResult = object : ConfigurationResult { //has to configure first before loading the app
-        override fun onFailure() {
-            viewModel.setConfigured(false)
-            Log.d(tag, "failed to configure")
+    private val configurationResult =
+        object : ConfigurationResult { //has to configure first before loading the app
+            override fun onFailure() {
+                viewModel.setConfigured(false)
+                Log.d(tag, "failed to configure")
+            }
+
+            override fun onSuccess() {
+                viewModel.setConfigured(true)
+                Log.d(tag, "succeeded to configure")
+            }
         }
 
-        override fun onSuccess() {
-            viewModel.setConfigured(true)
-            Log.d(tag, "succeeded to configure")
+    private val exerciseListActivityLauncher =
+        registerForActivityResult(StartActivityForResult()) { result -> //workout launcher
+            if (result.resultCode == Activity.RESULT_OK) {
+                val workoutId = result.data?.getStringExtra("workoutId")
+                startWorkout(workoutId)
+            }
         }
-    }
-
-    private val exerciseListActivityLauncher = registerForActivityResult(StartActivityForResult()) { result -> //workout launcher
-        if (result.resultCode == Activity.RESULT_OK) {
-            val workoutId = result.data?.getStringExtra("workoutId")
-            startWorkout(workoutId)
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,34 +122,68 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.itemIconTintList = null // Remove icon tint list
         bottomNavigationView.setOnItemSelectedListener { item -> //navbar
+            val auth = FirebaseAuth.getInstance()
+            val currentUser = auth.currentUser
+
             when (item.itemId) {
                 R.id.homeFragment -> {
                     true
                 }
+
                 R.id.profileFragment -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    if (currentUser != null) {
+                        // Fetch the gym ID from the Members subcollection where the current user's document exists
+                        FirebaseFirestore.getInstance()
+                            .collectionGroup("Members")
+                            .whereEqualTo("Email", currentUser.email) // Assuming Email is stored in Members
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                var gymId: String? = null
+                                for (document in documents) {
+                                    if (document.id == currentUser.uid || document.getString("Email") == currentUser.email) {
+                                        gymId = document.reference.parent.parent?.id
+                                        break
+                                    }
+                                }
+                                if (gymId != null) {
+                                    val intent = Intent(this, ProfileActivity::class.java)
+                                    intent.putExtra("gymId", gymId)
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(this, "Gym ID not found.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("Navigation", "Error fetching gym ID: ", e)
+                                Toast.makeText(this, "Error fetching gym ID.", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
+                        Toast.makeText(this, "Please log in to view your profile", Toast.LENGTH_SHORT).show()
+                    }
                     true
                 }
+
+
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     true
                 }
+
                 R.id.rewardsFragment -> {
-                    val currentUser = FirebaseAuth.getInstance().currentUser
                     if (currentUser != null) {
                         startActivity(Intent(this, RewardsActivity::class.java))
                         Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     } else {
-                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     true
                 }
                 else -> false
             }
         }
-
     }
 
     private fun setClickListeners() {

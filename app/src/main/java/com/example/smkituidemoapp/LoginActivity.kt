@@ -2,14 +2,14 @@ package com.example.smkituidemoapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -18,24 +18,29 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        // ... (Initialize UI elements) ...
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+
         val emailInput = findViewById<EditText>(R.id.emailTextInput)
         val passwordInput = findViewById<EditText>(R.id.passwordTextInput)
         val loginButton = findViewById<Button>(R.id.loginButton)
 
-        auth =  Firebase.auth
-
         loginButton.setOnClickListener {
-            // ... (Input collection) ...
             val email = emailInput.text.toString()
             val password = passwordInput.text.toString()
-            signIn(email, password)
-        }
-        val forgotPasswordText = findViewById<TextView>(R.id.forgotPasswordText)
 
-        forgotPasswordText.setOnClickListener { //forgot password feature
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                signIn(email, password)
+            } else {
+                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        val forgotPasswordText = findViewById<TextView>(R.id.forgotPasswordText)
+        forgotPasswordText.setOnClickListener {
             val email = emailInput.text.toString()
-            if (email.isNotEmpty()) { // Check if email is provided
+            if (email.isNotEmpty()) {
                 sendPasswordResetEmail(email)
             } else {
                 Toast.makeText(this, "Please enter your email address", Toast.LENGTH_SHORT).show()
@@ -54,18 +59,21 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-
     private fun signIn(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Success! Login complete
-                    Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
+                    // Log success
+                    Log.d("LoginActivity", "signInWithEmail:success")
+
                     // Navigate to the main app screen
-                    startActivity(Intent(this, MainActivity::class.java))
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    startActivity(intent)
                     finish()
                 } else {
-                    // Login failed, display an error message
+                    // Log failure
+                    Log.w("LoginActivity", "signInWithEmail:failure", task.exception)
                     Toast.makeText(this, "Login Failed. ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }

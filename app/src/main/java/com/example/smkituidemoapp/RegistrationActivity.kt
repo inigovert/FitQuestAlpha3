@@ -2,12 +2,14 @@ package com.example.smkituidemoapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityRegistrationBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,10 +34,11 @@ class RegistrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        FirebaseFirestore.setLoggingEnabled(true)
 
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
-        gymSpinner = binding.Gymspinner
+        gymSpinner = binding.Gymspinner // Ensure your spinner ID matches this
 
         fetchGyms()
 
@@ -101,32 +104,52 @@ class RegistrationActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .setDisplayName("$firstName $lastName")
-                        .build()
-                    user?.updateProfile(profileUpdates)?.addOnCompleteListener {
-                        val memberRef = db.collection("Gym").document(gym.id)
-                            .collection("Members").document(memberId)
-                        val userData = hashMapOf(
-                            "First Name" to firstName,
-                            "Last Name" to lastName,
-                            "Email" to email,
-                            "Status" to "Active User" // Change this value as needed
-                        )
-                        memberRef.set(userData)
-                            .addOnSuccessListener {
-                                Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
-                                startActivity(Intent(this, MainActivity::class.java))
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(this, "Failed to store user data in Firestore.", Toast.LENGTH_LONG).show()
-                            }
+                    if (user != null) {
+                        updateProfileAndSaveData(user, firstName, lastName, email, gym, memberId)
+                    } else {
+                        Toast.makeText(this, "User authentication failed.", Toast.LENGTH_LONG).show()
                     }
                 } else {
+                    Log.e("createAccount", "Registration failed: ", task.exception)
                     Toast.makeText(this, "Registration Failed. ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
+
+    private fun updateProfileAndSaveData(user: FirebaseUser, firstName: String, lastName: String, email: String, gym: Gym, memberId: String) {
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName("$firstName $lastName")
+            .build()
+        user.updateProfile(profileUpdates).addOnCompleteListener { profileTask ->
+            if (profileTask.isSuccessful) {
+                saveMemberData(user.uid, firstName, lastName, email, gym, memberId)
+            } else {
+                Log.e("createAccount", "Failed to update user profile: ", profileTask.exception)
+                Toast.makeText(this, "Failed to update user profile.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun saveMemberData(uid: String, firstName: String, lastName: String, email: String, gym: Gym, memberId: String) {
+        val memberRef = db.collection("Gym").document(gym.id)
+            .collection("Members").document(memberId)
+        val userData = hashMapOf(
+            "UID" to uid,
+            "First Name" to firstName,
+            "Last Name" to lastName,
+            "Email" to email,
+            "Status" to "Active User"
+        )
+        memberRef.set(userData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Log.e("createAccount", "Failed to store member data in Firestore: ", e)
+                Toast.makeText(this, "Failed to store member data in Firestore.", Toast.LENGTH_LONG).show()
+            }
+    }
+
 }
