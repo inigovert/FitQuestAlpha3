@@ -32,6 +32,7 @@ import java.util.UUID
 import android.app.Activity
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import com.example.gymmembership.ProfileActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.sency.smkitui.model.SMExercise
@@ -131,7 +132,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 }
 
                 R.id.profileFragment -> {
-                    val currentUser = FirebaseAuth.getInstance().currentUser
                     if (currentUser != null) {
                         // Fetch the gym ID from the Members subcollection where the current user's document exists
                         FirebaseFirestore.getInstance()
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                             .addOnSuccessListener { documents ->
                                 var gymId: String? = null
                                 for (document in documents) {
-                                    if (document.id == currentUser.uid || document.getString("Email") == currentUser.email) {
+                                    if (document.getString("Email") == currentUser.email) {
                                         gymId = document.reference.parent.parent?.id
                                         break
                                     }
