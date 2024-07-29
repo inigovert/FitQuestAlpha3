@@ -122,7 +122,7 @@ class RegistrationActivity : AppCompatActivity() {
             .build()
         user.updateProfile(profileUpdates).addOnCompleteListener { profileTask ->
             if (profileTask.isSuccessful) {
-                saveMemberData(user.uid, firstName, lastName, email, gym, memberId)
+                saveMemberData(firstName, lastName, email, gym, memberId)
             } else {
                 Log.e("createAccount", "Failed to update user profile: ", profileTask.exception)
                 Toast.makeText(this, "Failed to update user profile.", Toast.LENGTH_LONG).show()
@@ -130,11 +130,10 @@ class RegistrationActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveMemberData(uid: String, firstName: String, lastName: String, email: String, gym: Gym, memberId: String) {
+    private fun saveMemberData(firstName: String, lastName: String, email: String, gym: Gym, memberId: String) {
         val memberRef = db.collection("Gym").document(gym.id)
             .collection("Members").document(memberId)
         val userData = hashMapOf(
-            "UID" to uid,
             "First Name" to firstName,
             "Last Name" to lastName,
             "Email" to email,

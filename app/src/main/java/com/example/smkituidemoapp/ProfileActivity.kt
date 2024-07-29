@@ -1,21 +1,18 @@
-package com.example.gymmembership
+package com.example.smkituidemoapp
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.smkituidemoapp.InitialLoginActivity
-import com.example.smkituidemoapp.R
+import com.example.smkituidemoapp.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.example.smkituidemoapp.databinding.ActivityProfileBinding
 
 class ProfileActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityProfileBinding
-    private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,45 +20,42 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
-        db = Firebase.firestore
-
+        val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
-        val gymId = intent.getStringExtra("GYM_ID")
 
-        if (currentUser != null && gymId != null) {
-            val userRef = db.collection("Gym").document(gymId).collection("Members").document(currentUser.email!!)
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        binding.firstNameTextView.text = "First Name: ${document.getString("firstName") ?: "N/A"}"
-                        binding.lastNameTextView.text = "Last Name: ${document.getString("lastName") ?: "N/A"}"
-                        binding.emailTextView.text = "Email: ${document.getString("email") ?: "N/A"}"
-                        binding.pointsTextView.text = "Points: ${document.getLong("points") ?: 0}"
+        db = FirebaseFirestore.getInstance()
 
-                        fetchWorkoutHistory(currentUser.email!!, gymId)
+        val bottomNavigationView = binding.bottomNavigation
+        bottomNavigationView.itemIconTintList = null // Remove icon tint list
+
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.homeFragment -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    true
+                }
+                R.id.profileFragment -> {
+                    true
+                }
+                R.id.bmiFragment -> {
+                    startActivity(Intent(this, BMICalculatorActivity::class.java))
+                    true
+                }
+                R.id.rewardsFragment -> {
+                    if (currentUser != null) {
+                        startActivity(Intent(this, RewardsActivity::class.java))
                     } else {
-                        Log.e("ProfileActivity", "Document does not exist or is null")
-                        binding.firstNameTextView.text = "First Name: N/A"
-                        binding.lastNameTextView.text = "Last Name: N/A"
-                        binding.emailTextView.text = "Email: N/A"
-                        binding.pointsTextView.text = "Points: 0"
+                        Toast.makeText(this, "Please log in to view rewards", Toast.LENGTH_SHORT).show()
                     }
+                    true
                 }
-                .addOnFailureListener { exception ->
-                    Log.e("ProfileActivity", "Error getting user details: ", exception)
-                    binding.firstNameTextView.text = "First Name: Error"
-                    binding.lastNameTextView.text = "Last Name: Error"
-                    binding.emailTextView.text = "Email: Error"
-                    binding.pointsTextView.text = "Points: Error"
-                }
+                else -> false
+            }
+        }
+
+        if (currentUser != null) {
+            loadUserData(currentUser.email)
         } else {
-            if (currentUser == null) {
-                Log.e("ProfileActivity", "User is not logged in")
-            }
-            if (gymId == null) {
-                Log.e("ProfileActivity", "gymId is null")
-            }
             binding.firstNameTextView.text = "First Name: Not Logged In"
             binding.lastNameTextView.text = "Last Name: Not Logged In"
             binding.emailTextView.text = "Email: Not Logged In"
@@ -79,21 +73,33 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchWorkoutHistory(email: String, gymId: String) {
-        db.collection("Gym")
-            .document(gymId)
-            .collection("Members")
-            .document(email)
-            .collection("WorkoutHistory")
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    Log.d("ProfileActivity", "${document.id} => ${document.data}")
+    private fun loadUserData(email: String?) {
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val firstName = document.getString("First Name") ?: "No First Name"
+                        val lastName = document.getString("Last Name") ?: "No Last Name"
+                        val email = document.getString("Email") ?: "No Email"
+                        val points = document.getDouble("Points") ?: 0.0
+
+                        Log.d("ProfileActivity", "Retrieved data - FirstName: $firstName, LastName: $lastName, Email: $email, Points: $points")
+
+                        binding.firstNameTextView.text = "First Name: $firstName"
+                        binding.lastNameTextView.text = "Last Name: $lastName"
+                        binding.emailTextView.text = "Email: $email"
+                        binding.pointsTextView.text = "Points: $points"
+                    } else {
+                        Log.d("ProfileActivity", "No such document")
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.w("ProfileActivity", "Error getting workout history: ", e)
-            }
+                .addOnFailureListener { e ->
+                    Log.e("ProfileActivity", "Error fetching document", e)
+                }
+        }
     }
 
     override fun onBackPressed() {
@@ -101,3 +107,4 @@ class ProfileActivity : AppCompatActivity() {
         moveTaskToBack(true)
     }
 }
+

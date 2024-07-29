@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gymmembership.ProfileActivity
+
 import com.example.smkituidemoapp.databinding.ActivityRewardsBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -49,7 +49,6 @@ class RewardsActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.homeFragment -> {
                     startActivity(Intent(this, MainActivity::class.java))
-
                     true
                 }
                 R.id.profileFragment -> {
@@ -70,7 +69,7 @@ class RewardsActivity : AppCompatActivity() {
     }
 
     private fun loadUserPoints(userId: String) {
-        db.collection("users").document(userId)
+        db.collection("Members").document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
@@ -84,7 +83,7 @@ class RewardsActivity : AppCompatActivity() {
     }
 
     private fun loadRewardsList() {
-        db.collection("rewards")
+        db.collection("Rewards")
             .get()
             .addOnSuccessListener { documents ->
                 val rewardsList = mutableListOf<Reward>()
@@ -103,7 +102,7 @@ class RewardsActivity : AppCompatActivity() {
         val currentUser = auth.currentUser
         if (currentUser != null && userPoints >= reward.requiredPoints) {
             userPoints -= reward.requiredPoints
-            db.collection("users").document(currentUser.uid)
+            db.collection("Members").document(currentUser.uid)
                 .update("points", userPoints)
                 .addOnSuccessListener {
                     binding.currentPointsTextView.text = "Current Points: $userPoints"
