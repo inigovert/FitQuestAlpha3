@@ -32,9 +32,6 @@ import java.util.UUID
 import android.app.Activity
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import com.example.gymmembership.ProfileActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationBarView
 import com.sency.smkitui.model.SMExercise
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
@@ -98,7 +95,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         dailyProgressTextView = findViewById(R.id.dailyProgressMonitorTextView)
 
-        db = FirebaseFirestore.getInstance() //database initialization
+        db = FirebaseFirestore.getInstance()
 
         sharedPreferences = getSharedPreferences("workout_tracker", Context.MODE_PRIVATE)
 
@@ -132,38 +129,10 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 }
 
                 R.id.profileFragment -> {
-                    if (currentUser != null) {
-                        // Fetch the gym ID from the Members subcollection where the current user's document exists
-                        FirebaseFirestore.getInstance()
-                            .collectionGroup("Members")
-                            .whereEqualTo("Email", currentUser.email) // Assuming Email is stored in Members
-                            .get()
-                            .addOnSuccessListener { documents ->
-                                var gymId: String? = null
-                                for (document in documents) {
-                                    if (document.getString("Email") == currentUser.email) {
-                                        gymId = document.reference.parent.parent?.id
-                                        break
-                                    }
-                                }
-                                if (gymId != null) {
-                                    val intent = Intent(this, ProfileActivity::class.java)
-                                    intent.putExtra("gymId", gymId)
-                                    startActivity(intent)
-                                } else {
-                                    Toast.makeText(this, "Gym ID not found.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e("Navigation", "Error fetching gym ID: ", e)
-                                Toast.makeText(this, "Error fetching gym ID.", Toast.LENGTH_SHORT).show()
-                            }
-                    } else {
-                        Toast.makeText(this, "Please log in to view your profile", Toast.LENGTH_SHORT).show()
-                    }
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     true
                 }
-
 
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))

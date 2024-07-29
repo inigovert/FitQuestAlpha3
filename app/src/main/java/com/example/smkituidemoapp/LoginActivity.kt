@@ -9,18 +9,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Initialize Firebase Auth
+        // Initialize Firebase Auth and Firestore
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val emailInput = findViewById<EditText>(R.id.emailTextInput)
         val passwordInput = findViewById<EditText>(R.id.passwordTextInput)
@@ -63,7 +65,6 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Log success
                     Log.d("LoginActivity", "signInWithEmail:success")
 
                     // Navigate to the main app screen
@@ -72,7 +73,6 @@ class LoginActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    // Log failure
                     Log.w("LoginActivity", "signInWithEmail:failure", task.exception)
                     Toast.makeText(this, "Login Failed. ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }

@@ -1,16 +1,12 @@
-package com.example.gymmembership
+package com.example.smkituidemoapp
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.example.smkituidemoapp.InitialLoginActivity
-import com.example.smkituidemoapp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.example.smkituidemoapp.databinding.ActivityProfileBinding
 
 class ProfileActivity : AppCompatActivity() {
@@ -24,7 +20,7 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        db = Firebase.firestore
+        db = FirebaseFirestore.getInstance()
 
         val currentUser = auth.currentUser
         val gymId = intent.getStringExtra("GYM_ID")
@@ -34,10 +30,10 @@ class ProfileActivity : AppCompatActivity() {
             userRef.get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        binding.firstNameTextView.text = "First Name: ${document.getString("firstName") ?: "N/A"}"
-                        binding.lastNameTextView.text = "Last Name: ${document.getString("lastName") ?: "N/A"}"
-                        binding.emailTextView.text = "Email: ${document.getString("email") ?: "N/A"}"
-                        binding.pointsTextView.text = "Points: ${document.getLong("points") ?: 0}"
+                        binding.firstNameTextView.text = "First Name: ${document.getString("First Name") ?: "N/A"}"
+                        binding.lastNameTextView.text = "Last Name: ${document.getString("Last Name") ?: "N/A"}"
+                        binding.emailTextView.text = "Email: ${document.getString("Email") ?: "N/A"}"
+                        binding.pointsTextView.text = "Points: ${document.getLong("Points") ?: 0}"
 
                         fetchWorkoutHistory(currentUser.email!!, gymId)
                     } else {
