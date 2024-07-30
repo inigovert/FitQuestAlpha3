@@ -16,39 +16,35 @@ class RewardsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRewardsBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var rewardsRecyclerView: RecyclerView // Declare RecyclerView variable
+    private lateinit var rewardsRecyclerView: RecyclerView
 
     private var userPoints: Long = 0
+    private var gymId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRewardsBinding.inflate(layoutInflater)
-        val bottomNavigationView = binding.bottomNavigation
-        bottomNavigationView.itemIconTintList = null // Remove icon tint list
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        rewardsRecyclerView = binding.rewardsRecyclerView // Initialize RecyclerView
+        rewardsRecyclerView = binding.rewardsRecyclerView
         rewardsRecyclerView.layoutManager = LinearLayoutManager(this)
 
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            loadUserPoints(currentUser.uid)
-            loadRewardsList()
+            loadUserGymAndPoints(currentUser.email)
         }
 
         setupBottomNavigationBar()
     }
-
 
     private fun setupBottomNavigationBar() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {
                     startActivity(Intent(this, MainActivity::class.java))
-
                     true
                 }
                 R.id.profileFragment -> {
@@ -68,28 +64,42 @@ class RewardsActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadUserPoints(userId: String) {
-        db.collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    userPoints = document.getLong("points") ?: 0
-                    binding.currentPointsTextView.text = "Current Points: $userPoints"
+    private fun loadUserGymAndPoints(email: String?) {
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        userPoints = document.getLong("Points") ?: 0
+                        binding.currentPointsTextView.text = "Current Points: $userPoints"
+
+                        gymId = document.reference.parent.parent?.id
+                        if (gymId != null) {
+                            loadRewardsList(gymId!!)
+                        } else {
+                            Log.e("RewardsActivity", "Gym ID is null")
+                        }
+                    } else {
+                        Log.d("RewardsActivity", "No such document")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("RewardsActivity", "Error getting user points: ", exception)
-            }
+                .addOnFailureListener { e ->
+                    Log.e("RewardsActivity", "Error fetching document", e)
+                }
+        }
     }
 
-    private fun loadRewardsList() {
-        db.collection("rewards")
+    private fun loadRewardsList(gymId: String) {
+        db.collection("Gym").document(gymId).collection("Rewards")
             .get()
             .addOnSuccessListener { documents ->
                 val rewardsList = mutableListOf<Reward>()
                 for (document in documents) {
                     val reward = document.toObject(Reward::class.java)
                     rewardsList.add(reward)
+                    Log.d("RewardsActivity", "Reward: ${reward.rewardName}, Description: ${reward.rewardDescription}, Required Points: ${reward.requiredPoints}, Status: ${reward.status}")
                 }
                 rewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
             }
@@ -102,8 +112,8 @@ class RewardsActivity : AppCompatActivity() {
         val currentUser = auth.currentUser
         if (currentUser != null && userPoints >= reward.requiredPoints) {
             userPoints -= reward.requiredPoints
-            db.collection("users").document(currentUser.uid)
-                .update("points", userPoints)
+            db.collection("Gym").document(gymId!!).collection("Members").document(currentUser.uid)
+                .update("Points", userPoints)
                 .addOnSuccessListener {
                     binding.currentPointsTextView.text = "Current Points: $userPoints"
                     Toast.makeText(this, "Reward claimed successfully!", Toast.LENGTH_SHORT).show()
