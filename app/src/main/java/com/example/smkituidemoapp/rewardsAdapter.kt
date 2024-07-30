@@ -17,6 +17,7 @@ class RewardsAdapter(
         val rewardNameTextView: TextView = itemView.findViewById(R.id.rewardNameTextView)
         val rewardDescriptionTextView: TextView = itemView.findViewById(R.id.rewardDescriptionTextView)
         val requiredPointsTextView: TextView = itemView.findViewById(R.id.requiredPointsTextView)
+        //val statusTextView: TextView = itemView.findViewById(R.id.statusTextView)
         val claimRewardButton: Button = itemView.findViewById(R.id.claimRewardButton)
     }
 
@@ -30,6 +31,7 @@ class RewardsAdapter(
         holder.rewardNameTextView.text = reward.rewardName
         holder.rewardDescriptionTextView.text = reward.rewardDescription
         holder.requiredPointsTextView.text = "Required Points: ${reward.requiredPoints}"
+        //holder.statusTextView.text = "Status: ${reward.status}"
         holder.claimRewardButton.isEnabled = userPoints >= reward.requiredPoints
 
         holder.claimRewardButton.setOnClickListener {

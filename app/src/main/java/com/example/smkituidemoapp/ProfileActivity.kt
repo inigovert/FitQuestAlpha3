@@ -107,4 +107,3 @@ class ProfileActivity : AppCompatActivity() {
         moveTaskToBack(true)
     }
 }
-
