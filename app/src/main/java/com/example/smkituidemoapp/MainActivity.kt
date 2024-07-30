@@ -300,18 +300,43 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private fun updatePointsInFirestore(points: Int) {
-        val userId = getUserId()
-        if (userId != null) {
-            val userRef =
-                db.collection("Gym").document("gymId").collection("Members").document(userId)
-            userRef.update("Points", FieldValue.increment(points.toDouble()))
-                .addOnSuccessListener {
-                    Log.d(tag, "Points updated in Firestore: $points")
+        val email = getUserEmail() // Assume this method returns the currently authenticated user's email
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
+                        val userId = document.id // This gets the Member document ID
+
+                        if (gymId != null && userId != null) {
+                            val userRef = db.collection("Gym").document(gymId).collection("Members").document(userId)
+                            userRef.update("Points", FieldValue.increment(points.toDouble()))
+                                .addOnSuccessListener {
+                                    Log.d(tag, "Points updated in Firestore: $points")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(tag, "Error updating points in Firestore", e)
+                                }
+                        } else {
+                            Log.e(tag, "Error: Could not determine gymId or userId.")
+                        }
+                    } else {
+                        Log.d(tag, "No such document")
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Log.e(tag, "Error updating points in Firestore", e)
+                    Log.e("ProfileActivity", "Error fetching document", e)
                 }
         }
+    }
+
+    // Dummy method to get the authenticated user's email
+    private fun getUserEmail(): String? {
+        // Replace this with actual implementation to get the authenticated user's email
+        return FirebaseAuth.getInstance().currentUser?.email
     }
 
     private fun calculatePoints(averageScore: Float): Int {
