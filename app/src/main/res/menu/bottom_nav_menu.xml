@@ -11,7 +11,7 @@
     <item
         android:id="@+id/bmiFragment"
         android:icon="@drawable/statistics"
-        android:title="BMI" />
+        android:title="Stats" />
     <item
         android:id="@+id/rewardsFragment"
         android:icon="@drawable/ic_reward"
