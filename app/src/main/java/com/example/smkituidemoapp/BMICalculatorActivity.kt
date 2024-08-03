@@ -3,6 +3,7 @@ package com.example.smkituidemoapp
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Button
@@ -138,17 +139,45 @@ class BMICalculatorActivity : AppCompatActivity() {
             val weightEntry = hashMapOf(
                 "weight" to weight,
                 "date" to date,
-                "bmi" to calculateBMI(heightInput.text.toString().toDouble(), weight).bmi
+                "time" to SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                "bmi" to calculateBMI(heightInput.text.toString().toDouble(), weight).bmi,
+                "bmi_classification" to calculateBMI(heightInput.text.toString().toDouble(), weight).classification
             )
 
-            db.collection("users").document(currentUser.uid).collection("weight_entries")
-                .add(weightEntry)
+            // Constructing the correct Firestore path
+            val gymId = "GYM001" // Replace this with your logic to retrieve the correct gym ID if dynamic
+            val memberId = "U001" // Replace this with the logic to get the specific member ID
+            val userDocRef = db.collection("Gym").document(gymId).collection("Members").document(memberId)
+            val weightEntriesCollectionRef = userDocRef.collection("weight_entries")
+            val weightDetailsDocRef = weightEntriesCollectionRef.document("weight_details") // Automatically generates a new document ID
+
+            weightDetailsDocRef
+                .set(weightEntry)
                 .addOnSuccessListener {
                     Toast.makeText(this, "Weight logged successfully", Toast.LENGTH_SHORT).show()
+                    Log.d("BMICalculatorActivity", "Weight logged successfully: ${weightDetailsDocRef.id}")
+
+                    // Fetching the document to verify its creation
+                    weightEntriesCollectionRef.document(weightDetailsDocRef.id).get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                Log.d("BMICalculatorActivity", "Document exists at the expected location: ${document.id}")
+                            } else {
+                                Log.d("BMICalculatorActivity", "Document does not exist where expected.")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("BMICalculatorActivity", "Error fetching document: ${e.message}", e)
+                        }
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "Error logging weight: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("BMICalculatorActivity", "Error logging weight", e)
                 }
+        } else {
+            Toast.makeText(this, "User not logged in or invalid date", Toast.LENGTH_SHORT).show()
         }
     }
+
+
 }
