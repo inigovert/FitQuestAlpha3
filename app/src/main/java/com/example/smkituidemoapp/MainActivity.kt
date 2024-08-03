@@ -333,6 +333,34 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
+    private fun fetchGymIdAndMemberId(callback: (String?, String?) -> Unit) {
+        val email = getUserEmail()
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
+                        val memberId = document.id // This gets the Member document ID
+                        callback(gymId, memberId)
+                    } else {
+                        Log.e(tag, "No such document")
+                        callback(null, null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(tag, "Error fetching member document", e)
+                    callback(null, null)
+                }
+        } else {
+            callback(null, null)
+        }
+    }
+
+
+
     // Dummy method to get the authenticated user's email
     private fun getUserEmail(): String? {
         // Replace this with actual implementation to get the authenticated user's email
@@ -401,8 +429,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         return userId
     }
 
-    private val launcher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+    private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val permissionGranted = permissions.entries.all {
                 PERMISSIONS_REQUIRED.contains(it.key) && it.value
             }

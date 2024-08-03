@@ -144,40 +144,75 @@ class BMICalculatorActivity : AppCompatActivity() {
                 "bmi_classification" to calculateBMI(heightInput.text.toString().toDouble(), weight).classification
             )
 
-            // Constructing the correct Firestore path
-            val gymId = "GYM001" // Replace this with your logic to retrieve the correct gym ID if dynamic
-            val memberId = "U001" // Replace this with the logic to get the specific member ID
-            val userDocRef = db.collection("Gym").document(gymId).collection("Members").document(memberId)
-            val weightEntriesCollectionRef = userDocRef.collection("weight_entries")
-            val weightDetailsDocRef = weightEntriesCollectionRef.document("weight_details") // Automatically generates a new document ID
+            fetchGymIdAndMemberId { gymId, memberId ->
+                if (gymId != null && memberId != null) {
+                    // Constructing the correct Firestore path
+                    val userDocRef = db.collection("Gym").document(gymId).collection("Members").document(memberId)
+                    val weightEntriesCollectionRef = userDocRef.collection("weight_entries")
+                    val weightDetailsDocRef = weightEntriesCollectionRef.document("weight_details") // Automatically generates a new document ID
 
-            weightDetailsDocRef
-                .set(weightEntry)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Weight logged successfully", Toast.LENGTH_SHORT).show()
-                    Log.d("BMICalculatorActivity", "Weight logged successfully: ${weightDetailsDocRef.id}")
+                    weightDetailsDocRef
+                        .set(weightEntry)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Weight logged successfully", Toast.LENGTH_SHORT).show()
+                            Log.d("BMICalculatorActivity", "Weight logged successfully: ${weightDetailsDocRef.id}")
 
-                    // Fetching the document to verify its creation
-                    weightEntriesCollectionRef.document(weightDetailsDocRef.id).get()
-                        .addOnSuccessListener { document ->
-                            if (document.exists()) {
-                                Log.d("BMICalculatorActivity", "Document exists at the expected location: ${document.id}")
-                            } else {
-                                Log.d("BMICalculatorActivity", "Document does not exist where expected.")
-                            }
+                            // Fetching the document to verify its creation
+                            weightEntriesCollectionRef.document(weightDetailsDocRef.id).get()
+                                .addOnSuccessListener { document ->
+                                    if (document.exists()) {
+                                        Log.d("BMICalculatorActivity", "Document exists at the expected location: ${document.id}")
+                                    } else {
+                                        Log.d("BMICalculatorActivity", "Document does not exist where expected.")
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("BMICalculatorActivity", "Error fetching document: ${e.message}", e)
+                                }
                         }
                         .addOnFailureListener { e ->
-                            Log.e("BMICalculatorActivity", "Error fetching document: ${e.message}", e)
+                            Toast.makeText(this, "Error logging weight: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Log.e("BMICalculatorActivity", "Error logging weight", e)
                         }
+                } else {
+                    Toast.makeText(this, "Failed to log weight. Gym ID or Member ID not found.", Toast.LENGTH_SHORT).show()
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error logging weight: ${e.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("BMICalculatorActivity", "Error logging weight", e)
-                }
+            }
         } else {
             Toast.makeText(this, "User not logged in or invalid date", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun fetchGymIdAndMemberId(callback: (String?, String?) -> Unit) {
+        val email = getUserEmail()
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
+                        val memberId = document.id // This gets the Member document ID
+                        callback(gymId, memberId)
+                    } else {
+                        Log.e("BMICalculatorActivity", "No such document")
+                        callback(null, null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("BMICalculatorActivity", "Error fetching member document", e)
+                    callback(null, null)
+                }
+        } else {
+            callback(null, null)
+        }
+    }
+
+    private fun getUserEmail(): String? {
+        return FirebaseAuth.getInstance().currentUser?.email
+    }
+
 
 
 }
