@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -142,8 +141,6 @@ class RegistrationActivity : AppCompatActivity() {
         )
         memberRef.set(userData)
             .addOnSuccessListener {
-                // Create pending_rewards and claimed_rewards collections
-                createInitialCollections(memberRef)
                 Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
@@ -154,27 +151,4 @@ class RegistrationActivity : AppCompatActivity() {
             }
     }
 
-    private fun createInitialCollections(memberRef: DocumentReference) {
-        val initialData = hashMapOf("initialized" to true)
-
-        // Create pending_rewards collection
-        memberRef.collection("pending_rewards").document("init")
-            .set(initialData)
-            .addOnSuccessListener {
-                Log.d("createInitialCollections", "pending_rewards collection created successfully.")
-            }
-            .addOnFailureListener { e ->
-                Log.e("createInitialCollections", "Failed to create pending_rewards collection: ", e)
-            }
-
-        // Create claimed_rewards collection
-        memberRef.collection("claimed_rewards").document("init")
-            .set(initialData)
-            .addOnSuccessListener {
-                Log.d("createInitialCollections", "claimed_rewards collection created successfully.")
-            }
-            .addOnFailureListener { e ->
-                Log.e("createInitialCollections", "Failed to create claimed_rewards collection: ", e)
-            }
-    }
 }
