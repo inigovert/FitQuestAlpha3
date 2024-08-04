@@ -73,7 +73,7 @@ class BMICalculatorActivity : AppCompatActivity() {
 
             if (heightStr.isNotEmpty() && weightStr.isNotEmpty()) {
                 val result = calculateBMI(heightStr.toDouble(), weightStr.toDouble())
-                resultText.text = "Your BMI: ${String.format("%.2f", result.bmi)}\nClassification: ${result.classification}"
+                resultText.text = "Your BMI: ${result.bmi}\nClassification: ${result.classification}"
             } else {
                 resultText.text = "Please enter your height and weight."
             }
@@ -88,11 +88,11 @@ class BMICalculatorActivity : AppCompatActivity() {
         }
     }
 
-    private data class BMIResult(val bmi: Double, val classification: String)
+    private data class BMIResult(val bmi: Int, val classification: String)
 
     private fun calculateBMI(heightCm: Double, weightKg: Double): BMIResult {
         val heightMeters = heightCm / 100.0
-        val bmi = weightKg / (heightMeters * heightMeters)
+        val bmi = (weightKg / (heightMeters * heightMeters)).toInt()
 
         val classification = when {
             bmi < 18.5 -> "Underweight"
@@ -136,20 +136,20 @@ class BMICalculatorActivity : AppCompatActivity() {
         val currentUser = auth.currentUser
 
         if (currentUser != null && date != null) {
+            val bmiResult = calculateBMI(heightInput.text.toString().toDouble(), weight)
             val weightEntry = hashMapOf(
                 "weight" to weight,
                 "date" to date,
                 "time" to SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
-                "bmi" to calculateBMI(heightInput.text.toString().toDouble(), weight).bmi,
-                "bmi_classification" to calculateBMI(heightInput.text.toString().toDouble(), weight).classification
+                "bmi" to bmiResult.bmi,
+                "bmi_classification" to bmiResult.classification
             )
 
             fetchGymIdAndMemberId { gymId, memberId ->
                 if (gymId != null && memberId != null) {
-                    // Constructing the correct Firestore path
                     val userDocRef = db.collection("Gym").document(gymId).collection("Members").document(memberId)
                     val weightEntriesCollectionRef = userDocRef.collection("weight_entries")
-                    val weightDetailsDocRef = weightEntriesCollectionRef.document("weight_details") // Automatically generates a new document ID
+                    val weightDetailsDocRef = weightEntriesCollectionRef.document(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(date))
 
                     weightDetailsDocRef
                         .set(weightEntry)
@@ -157,7 +157,6 @@ class BMICalculatorActivity : AppCompatActivity() {
                             Toast.makeText(this, "Weight logged successfully", Toast.LENGTH_SHORT).show()
                             Log.d("BMICalculatorActivity", "Weight logged successfully: ${weightDetailsDocRef.id}")
 
-                            // Fetching the document to verify its creation
                             weightEntriesCollectionRef.document(weightDetailsDocRef.id).get()
                                 .addOnSuccessListener { document ->
                                     if (document.exists()) {
@@ -192,8 +191,8 @@ class BMICalculatorActivity : AppCompatActivity() {
                 .addOnSuccessListener { documents ->
                     if (documents != null && !documents.isEmpty) {
                         val document = documents.first()
-                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
-                        val memberId = document.id // This gets the Member document ID
+                        val gymId = document.reference.parent.parent?.id
+                        val memberId = document.id
                         callback(gymId, memberId)
                     } else {
                         Log.e("BMICalculatorActivity", "No such document")
@@ -212,7 +211,4 @@ class BMICalculatorActivity : AppCompatActivity() {
     private fun getUserEmail(): String? {
         return FirebaseAuth.getInstance().currentUser?.email
     }
-
-
-
 }

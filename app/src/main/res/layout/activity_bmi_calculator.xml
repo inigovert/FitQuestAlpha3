@@ -59,6 +59,7 @@
             android:layout_height="wrap_content"
             android:hint="Select Date"
             android:focusable="false"
+            android:clickable="true"
             android:textColor="@color/white"
             android:textColorHint="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -98,6 +99,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resultText"
         app:layout_constraintWidth_percent="0.8" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
+        android:layout_width="311dp"
+        android:layout_height="282dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logWeightButton"
+        app:layout_constraintVertical_bias="0.19" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

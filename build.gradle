@@ -21,6 +21,7 @@ allprojects {
             url "https://artifacts.sency.ai/artifactory/release/"
 
         }
+        maven { url 'https://jitpack.io' }
     }
 }
 
