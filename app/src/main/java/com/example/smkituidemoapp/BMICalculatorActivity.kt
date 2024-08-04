@@ -2,6 +2,7 @@ package com.example.smkituidemoapp
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
@@ -14,6 +15,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import java.util.Calendar
+import java.util.Locale
 
 class BMICalculatorActivity : AppCompatActivity() {
 
@@ -23,6 +33,8 @@ class BMICalculatorActivity : AppCompatActivity() {
     private lateinit var heightInput: EditText
     private lateinit var weightInput: EditText
     private lateinit var dateInput: EditText
+    private lateinit var lineChart: LineChart
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +44,15 @@ class BMICalculatorActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        lineChart = findViewById(R.id.lineChart)
         heightInput = findViewById(R.id.heightTextInput)
         weightInput = findViewById(R.id.weightTextInput)
+        binding.dateInput.setOnClickListener {
+            showDatePickerDialog()
+        }
+
+        fetchAndDisplayWeightData()
+
         dateInput = findViewById(R.id.dateInput)
 
         val resultText: TextView = findViewById(R.id.resultText)
@@ -90,6 +109,102 @@ class BMICalculatorActivity : AppCompatActivity() {
 
     private data class BMIResult(val bmi: Int, val classification: String)
 
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                val selectedDate = calendar.time
+                onDateSelected(selectedDate)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    }
+
+    private fun onDateSelected(date: Date) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateString = dateFormat.format(date)
+        binding.dateInput.setText(dateString)
+        Toast.makeText(this, "Selected date: $dateString", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun fetchAndDisplayWeightData() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            fetchGymIdAndMemberId { gymId, memberId ->
+                if (gymId != null && memberId != null) {
+                    db.collection("Gym").document(gymId).collection("Members").document(memberId)
+                        .collection("weight_entries")
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            val weightEntries = mutableListOf<Entry>()
+                            for (document in documents) {
+                                val date = document.getDate("date")
+                                val weight = document.getDouble("weight")
+                                if (date != null && weight != null) {
+                                    val entry = Entry(date.time.toFloat(), weight.toFloat())
+                                    weightEntries.add(entry)
+                                }
+                            }
+                            plotWeightData(weightEntries)
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error fetching weight data: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "Gym ID or Member ID not found", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun plotWeightData(entries: List<Entry>) {
+        val dataSet = LineDataSet(entries, "Weight")
+        dataSet.color = Color.WHITE // Line color
+        dataSet.valueTextColor = Color.WHITE // Value (text) color
+        dataSet.setCircleColor(Color.WHITE) // Circle color
+        dataSet.setDrawCircleHole(false)
+        dataSet.lineWidth = 2f // Line width
+        dataSet.circleRadius = 3f // Circle radius
+
+        val lineData = LineData(dataSet)
+        lineChart.data = lineData
+
+        // Configure X-Axis
+        val xAxis: XAxis = lineChart.xAxis
+        xAxis.textColor = Color.WHITE
+        xAxis.setDrawGridLines(false)
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+
+        // Configure Y-Axis
+        val yAxisLeft: YAxis = lineChart.axisLeft
+        yAxisLeft.textColor = Color.WHITE
+        yAxisLeft.setDrawGridLines(false)
+
+        val yAxisRight: YAxis = lineChart.axisRight
+        yAxisRight.isEnabled = false
+
+        // Configure Legend
+        val legend: Legend = lineChart.legend
+        legend.textColor = Color.WHITE
+
+        // Configure Description
+        lineChart.description.text = "Weight Progress"
+        lineChart.description.textColor = Color.WHITE
+
+        // Additional settings for better visibility
+        lineChart.setBackgroundColor(Color.BLACK)
+        lineChart.setNoDataTextColor(Color.WHITE)
+        lineChart.setNoDataText("No weight data available")
+        lineChart.invalidate() // Refresh the chart
+    }
+
     private fun calculateBMI(heightCm: Double, weightKg: Double): BMIResult {
         val heightMeters = heightCm / 100.0
         val bmi = (weightKg / (heightMeters * heightMeters)).toInt()
@@ -102,19 +217,6 @@ class BMICalculatorActivity : AppCompatActivity() {
         }
 
         return BMIResult(bmi, classification)
-    }
-
-    private fun showDatePickerDialog() {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            dateInput.setText("$selectedDay/${selectedMonth + 1}/$selectedYear")
-        }, year, month, day)
-
-        datePickerDialog.show()
     }
 
     private fun logWeight() {
