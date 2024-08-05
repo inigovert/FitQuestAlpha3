@@ -22,6 +22,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.components.MarkerView
 
 class BMICalculatorActivity : AppCompatActivity() {
 
@@ -179,9 +180,14 @@ class BMICalculatorActivity : AppCompatActivity() {
         val lineData = LineData(dataSet)
         lineChart.data = lineData
 
+        // Set the custom marker view
+        val markerView = CustomMarkerView(this, R.layout.custom_marker_view)
+        markerView.chartView = lineChart
+        lineChart.marker = markerView
+
         // Configure X-Axis
         val xAxis: XAxis = lineChart.xAxis
-        xAxis.textColor = Color.WHITE
+        xAxis.textColor = Color.BLACK
         xAxis.setDrawGridLines(false)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 
