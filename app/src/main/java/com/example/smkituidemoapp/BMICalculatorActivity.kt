@@ -22,8 +22,6 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import java.util.Calendar
-import java.util.Locale
 
 class BMICalculatorActivity : AppCompatActivity() {
 
@@ -34,7 +32,6 @@ class BMICalculatorActivity : AppCompatActivity() {
     private lateinit var weightInput: EditText
     private lateinit var dateInput: EditText
     private lateinit var lineChart: LineChart
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,13 +44,12 @@ class BMICalculatorActivity : AppCompatActivity() {
         lineChart = findViewById(R.id.lineChart)
         heightInput = findViewById(R.id.heightTextInput)
         weightInput = findViewById(R.id.weightTextInput)
+        dateInput = findViewById(R.id.dateInput)
         binding.dateInput.setOnClickListener {
             showDatePickerDialog()
         }
 
         fetchAndDisplayWeightData()
-
-        dateInput = findViewById(R.id.dateInput)
 
         val resultText: TextView = findViewById(R.id.resultText)
         val calculateButton: Button = findViewById(R.id.calculateButton)
@@ -126,7 +122,7 @@ class BMICalculatorActivity : AppCompatActivity() {
     }
 
     private fun onDateSelected(date: Date) {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val dateString = dateFormat.format(date)
         binding.dateInput.setText(dateString)
         Toast.makeText(this, "Selected date: $dateString", Toast.LENGTH_SHORT).show()
@@ -165,6 +161,13 @@ class BMICalculatorActivity : AppCompatActivity() {
     }
 
     private fun plotWeightData(entries: List<Entry>) {
+        if (entries.isEmpty()) {
+            lineChart.clear()
+            lineChart.setNoDataText("No weight data available")
+            lineChart.invalidate()
+            return
+        }
+
         val dataSet = LineDataSet(entries, "Weight")
         dataSet.color = Color.WHITE // Line color
         dataSet.valueTextColor = Color.WHITE // Value (text) color
@@ -257,19 +260,7 @@ class BMICalculatorActivity : AppCompatActivity() {
                         .set(weightEntry)
                         .addOnSuccessListener {
                             Toast.makeText(this, "Weight logged successfully", Toast.LENGTH_SHORT).show()
-                            Log.d("BMICalculatorActivity", "Weight logged successfully: ${weightDetailsDocRef.id}")
-
-                            weightEntriesCollectionRef.document(weightDetailsDocRef.id).get()
-                                .addOnSuccessListener { document ->
-                                    if (document.exists()) {
-                                        Log.d("BMICalculatorActivity", "Document exists at the expected location: ${document.id}")
-                                    } else {
-                                        Log.d("BMICalculatorActivity", "Document does not exist where expected.")
-                                    }
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("BMICalculatorActivity", "Error fetching document: ${e.message}", e)
-                                }
+                            fetchAndDisplayWeightData()
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(this, "Error logging weight: ${e.message}", Toast.LENGTH_SHORT).show()
