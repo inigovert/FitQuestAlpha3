@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    private var resetTime: Long = 0
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var dailyProgressTextView: TextView
     private lateinit var db: FirebaseFirestore
@@ -248,10 +247,10 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         Log.d(tag, "Average Score: $averageScore, Points: $points")
 
         updatePointsInFirestore(points)
+        saveWorkoutLog(points)
 
         Toast.makeText(baseContext, "Points Collected: $points!", Toast.LENGTH_SHORT).show()
     }
-
 
     private fun updatePointsInFirestore(points: Int) {
         val email = getUserEmail() // Assume this method returns the currently authenticated user's email
@@ -282,13 +281,48 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("ProfileActivity", "Error fetching document", e)
+                    Log.e("MainActivity", "Error fetching document", e)
+                }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun saveWorkoutLog(points: Int) {
+        val email = getUserEmail()
+        if (email != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val gymId = document.reference.parent.parent?.id
+                        val userId = document.id
+
+                        if (gymId != null && userId != null) {
+                            val userRef = db.collection("Gym").document(gymId).collection("Members").document(userId)
+                            val workoutLog = hashMapOf(
+                                "pointsEarned" to points,
+                                "date" to FieldValue.serverTimestamp()
+                            )
+                            userRef.collection("workout_logs")
+                                .add(workoutLog)
+                                .addOnSuccessListener { Log.d(tag, "Workout log added") }
+                                .addOnFailureListener { e -> Log.w(tag, "Error adding workout log", e) }
+                        } else {
+                            Log.e(tag, "Error: Could not determine gymId or userId.")
+                        }
+                    } else {
+                        Log.d(tag, "No such document")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MainActivity", "Error fetching document", e)
                 }
         }
     }
 
     private fun getUserEmail(): String? {
-        // Replace this with actual implementation to get the authenticated user's email
         return FirebaseAuth.getInstance().currentUser?.email
     }
 
@@ -321,14 +355,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                             "Retrieved data - FirstName: $firstName, LastName: $lastName, Email: $email, Points: $points"
                         )
 
-                        // Store data locally or update UI
-                        // val intent = Intent(this, ProfileActivity::class.java).apply {
-                        //     putExtra("firstName", firstName)
-                        //     putExtra("lastName", lastName)
-                        //     putExtra("email", email)
-                        //     putExtra("points", points)
-                        // }
-                        // startActivity(intent)
                     } else {
                         Log.d(tag, "No such document")
                     }
@@ -355,15 +381,15 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val permissionGranted = permissions.entries.all {
-                PERMISSIONS_REQUIRED.contains(it.key) && it.value
-            }
-            if (permissionGranted) {
-                configureKit()
-            } else {
-                Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
-            }
+        val permissionGranted = permissions.entries.all {
+            PERMISSIONS_REQUIRED.contains(it.key) && it.value
         }
+        if (permissionGranted) {
+            configureKit()
+        } else {
+            Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
+        }
+    }
 
     companion object {
         private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
