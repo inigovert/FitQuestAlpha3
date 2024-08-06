@@ -77,22 +77,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         _binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dailyProgressTextView = findViewById(R.id.dailyProgressMonitorTextView)
-
         db = FirebaseFirestore.getInstance()
-
-        sharedPreferences = getSharedPreferences("workout_tracker", MODE_PRIVATE)
-
-        resetTime = sharedPreferences.getLong("resetTime", 0)
-
-        if (LocalDate.now().format(formatter) != LocalDate.ofEpochDay(resetTime / 86400000)
-                .format(formatter)
-        ) {
-            sharedPreferences.edit().putBoolean("updatedToday", false).apply()
-            resetTime = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-            sharedPreferences.edit().putLong("resetTime", resetTime).apply()
-            resetWorkoutCounter()
-        }
 
         loadUserData()
         requestPermissions()
@@ -264,40 +249,9 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         updatePointsInFirestore(points)
 
-        completedWorkouts++
-        sharedPreferences.edit().putInt("completedWorkouts", completedWorkouts).apply()
-        updateDailyProgressText()
-
-        updateWorkoutCounterInFirestore(completedWorkouts)
-
         Toast.makeText(baseContext, "Points Collected: $points!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateWorkoutCounterInFirestore(completedWorkouts: Int) {
-        val userId = getUserId()
-        if (userId != null) {
-            val userRef =
-                db.collection("Gym").document("gymId").collection("Members").document(userId)
-            userRef.update("completedWorkoutsToday", completedWorkouts)
-                .addOnSuccessListener {
-                    Log.d(tag, "Completed workouts updated in Firestore: $completedWorkouts")
-                }
-                .addOnFailureListener { e ->
-                    Log.e(tag, "Error updating completed workouts in Firestore", e)
-                }
-        }
-    }
-
-    private fun resetWorkoutCounter() {
-        completedWorkouts = 0
-        sharedPreferences.edit().putInt("completedWorkouts", 0).apply()
-        updateDailyProgressText()
-        updateWorkoutCounterInFirestore(0)
-    }
-
-    private fun updateDailyProgressText() {
-        dailyProgressTextView.text = "Completed Workouts Today: $completedWorkouts/$totalWorkouts"
-    }
 
     private fun updatePointsInFirestore(points: Int) {
         val email = getUserEmail() // Assume this method returns the currently authenticated user's email
@@ -333,35 +287,6 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
-    private fun fetchGymIdAndMemberId(callback: (String?, String?) -> Unit) {
-        val email = getUserEmail()
-        if (email != null) {
-            db.collectionGroup("Members")
-                .whereEqualTo("Email", email)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents != null && !documents.isEmpty) {
-                        val document = documents.first()
-                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
-                        val memberId = document.id // This gets the Member document ID
-                        callback(gymId, memberId)
-                    } else {
-                        Log.e(tag, "No such document")
-                        callback(null, null)
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e(tag, "Error fetching member document", e)
-                    callback(null, null)
-                }
-        } else {
-            callback(null, null)
-        }
-    }
-
-
-
-    // Dummy method to get the authenticated user's email
     private fun getUserEmail(): String? {
         // Replace this with actual implementation to get the authenticated user's email
         return FirebaseAuth.getInstance().currentUser?.email
