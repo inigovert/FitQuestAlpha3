@@ -99,14 +99,47 @@ class RewardsActivity : AppCompatActivity() {
                 val rewardsList = mutableListOf<Reward>()
                 for (document in documents) {
                     val reward = document.toObject(Reward::class.java)
+                    reward.status = "claimable" // Default status
                     rewardsList.add(reward)
-                    Log.d("RewardsActivity", "Reward: ${reward.rewardName}, Description: ${reward.rewardDescription}, Required Points: ${reward.requiredPoints}, Status: ${reward.status}")
                 }
-                rewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
+                checkPendingRewards(rewardsList)
             }
             .addOnFailureListener { exception ->
                 Log.e("RewardsActivity", "Error getting rewards: ", exception)
             }
+    }
+
+    private fun checkPendingRewards(rewardsList: MutableList<Reward>) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", currentUser.email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val memberDocRef = document.reference
+
+                        memberDocRef.collection("pending_rewards")
+                            .get()
+                            .addOnSuccessListener { pendingRewards ->
+                                for (pendingReward in pendingRewards) {
+                                    val rewardName = pendingReward.id
+                                    rewardsList.find { it.rewardName == rewardName }?.status = "pending"
+                                }
+                                rewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("RewardsActivity", "Error getting pending rewards", e)
+                            }
+                    } else {
+                        Log.e("RewardsActivity", "No such document")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("RewardsActivity", "Error fetching user document", e)
+                }
+        }
     }
 
     private fun claimReward(reward: Reward) {
