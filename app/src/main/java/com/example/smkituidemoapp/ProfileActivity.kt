@@ -3,7 +3,7 @@ package com.example.smkituidemoapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
+import android.widget.CalendarView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityProfileBinding
@@ -26,7 +26,7 @@ class ProfileActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
 
         val bottomNavigationView = binding.bottomNavigation
-        bottomNavigationView.itemIconTintList = null // Remove icon tint list
+        bottomNavigationView.itemIconTintList = null
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -62,14 +62,17 @@ class ProfileActivity : AppCompatActivity() {
             binding.pointsTextView.text = "Points: N/A"
         }
 
-        // Logout button functionality
-        val logoutButton: Button = findViewById(R.id.logoutButton)
-        logoutButton.setOnClickListener {
+        binding.logoutButton.setOnClickListener {
             auth.signOut()
             val logoutIntent = Intent(this, InitialLoginActivity::class.java)
             logoutIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(logoutIntent)
             finish()
+        }
+
+        binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            val date = "$dayOfMonth/${month + 1}/$year"
+            Toast.makeText(this, "Selected date: $date", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -96,14 +99,9 @@ class ProfileActivity : AppCompatActivity() {
                         Log.d("ProfileActivity", "No such document")
                     }
                 }
-                .addOnFailureListener { e ->
-                    Log.e("ProfileActivity", "Error fetching document", e)
+                .addOnFailureListener { exception ->
+                    Log.d("ProfileActivity", "Failed to retrieve user data: ", exception)
                 }
         }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        moveTaskToBack(true)
     }
 }

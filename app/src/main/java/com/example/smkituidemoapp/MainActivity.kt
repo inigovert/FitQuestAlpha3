@@ -303,7 +303,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                             val userRef = db.collection("Gym").document(gymId).collection("Members").document(userId)
                             val workoutLog = hashMapOf(
                                 "pointsEarned" to points,
-                                "date" to FieldValue.serverTimestamp()
+                                "date" to FieldValue.serverTimestamp(),
                             )
                             userRef.collection("workout_logs")
                                 .add(workoutLog)
