@@ -260,7 +260,7 @@ class BMICalculatorActivity : AppCompatActivity() {
                 if (gymId != null && memberId != null) {
                     val userDocRef = db.collection("Gym").document(gymId).collection("Members").document(memberId)
                     val weightEntriesCollectionRef = userDocRef.collection("weight_entries")
-                    val weightDetailsDocRef = weightEntriesCollectionRef.document(SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(date))
+                    val weightDetailsDocRef = weightEntriesCollectionRef.document(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date))
 
                     weightDetailsDocRef
                         .set(weightEntry)

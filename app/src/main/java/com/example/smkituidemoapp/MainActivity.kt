@@ -1,5 +1,6 @@
 package com.example.smkituidemoapp
 
+import WorkoutReminderWorker
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,9 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.smkituidemoapp.databinding.MainActivityBinding
 import com.example.smkituidemoapp.viewModels.MainViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -32,6 +36,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
@@ -82,6 +87,12 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         requestPermissions()
         setClickListeners()
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission()
+        } else {
+            scheduleDailyWorkoutReminder()
+        }
+
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.itemIconTintList = null
         bottomNavigationView.setOnItemSelectedListener { item ->
@@ -114,6 +125,37 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 false
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                scheduleDailyWorkoutReminder()
+            } else {
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun requestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            scheduleDailyWorkoutReminder()
+        }
+    }
+
+    private fun scheduleDailyWorkoutReminder() {
+        val workRequest = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(24, TimeUnit.HOURS)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "WorkoutReminder",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
     }
 
     private fun setClickListeners() {
@@ -253,7 +295,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     }
 
     private fun updatePointsInFirestore(points: Int) {
-        val email = getUserEmail() // Assume this method returns the currently authenticated user's email
+        val email = getUserEmail()
         if (email != null) {
             db.collectionGroup("Members")
                 .whereEqualTo("Email", email)
@@ -261,11 +303,12 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                 .addOnSuccessListener { documents ->
                     if (documents != null && !documents.isEmpty) {
                         val document = documents.first()
-                        val gymId = document.reference.parent.parent?.id // This gets the Gym document ID
-                        val userId = document.id // This gets the Member document ID
+                        val gymId = document.reference.parent.parent?.id
+                        val userId = document.id
 
                         if (gymId != null && userId != null) {
-                            val userRef = db.collection("Gym").document(gymId).collection("Members").document(userId)
+                            val userRef = db.collection("Gym").document(gymId).collection("Members")
+                                .document(userId)
                             userRef.update("Points", FieldValue.increment(points.toDouble()))
                                 .addOnSuccessListener {
                                     Log.d(tag, "Points updated in Firestore: $points")
@@ -300,7 +343,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                         val userId = document.id
 
                         if (gymId != null && userId != null) {
-                            val userRef = db.collection("Gym").document(gymId).collection("Members").document(userId)
+                            val userRef = db.collection("Gym").document(gymId).collection("Members")
+                                .document(userId)
                             val workoutLog = hashMapOf(
                                 "pointsEarned" to points,
                                 "date" to FieldValue.serverTimestamp(),
@@ -308,7 +352,9 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                             userRef.collection("workout_logs")
                                 .add(workoutLog)
                                 .addOnSuccessListener { Log.d(tag, "Workout log added") }
-                                .addOnFailureListener { e -> Log.w(tag, "Error adding workout log", e) }
+                                .addOnFailureListener { e ->
+                                    Log.w(tag, "Error adding workout log", e)
+                                }
                         } else {
                             Log.e(tag, "Error: Could not determine gymId or userId.")
                         }
@@ -380,16 +426,17 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         return userId
     }
 
-    private val launcher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val permissionGranted = permissions.entries.all {
-            PERMISSIONS_REQUIRED.contains(it.key) && it.value
+    private val launcher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val permissionGranted = permissions.entries.all {
+                PERMISSIONS_REQUIRED.contains(it.key) && it.value
+            }
+            if (permissionGranted) {
+                configureKit()
+            } else {
+                Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
+            }
         }
-        if (permissionGranted) {
-            configureKit()
-        } else {
-            Toast.makeText(baseContext, "Permission request denied", Toast.LENGTH_LONG).show()
-        }
-    }
 
     companion object {
         private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)

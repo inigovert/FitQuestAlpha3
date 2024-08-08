@@ -67,7 +67,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.9.0"
     implementation 'com.google.android.gms:play-services-base:18.5.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
     implementation libs.firebase.auth.ktx
     implementation libs.firebase.auth
     testImplementation 'junit:junit:4.13.2'
