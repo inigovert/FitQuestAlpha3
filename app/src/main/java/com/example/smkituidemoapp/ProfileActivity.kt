@@ -1,20 +1,27 @@
 package com.example.smkituidemoapp
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.CalendarView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smkituidemoapp.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private lateinit var db: FirebaseFirestore
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
@@ -55,6 +62,7 @@ class ProfileActivity : AppCompatActivity() {
 
         if (currentUser != null) {
             loadUserData(currentUser.email)
+            fetchWorkoutLogs(currentUser.uid)
         } else {
             binding.firstNameTextView.text = "First Name: Not Logged In"
             binding.lastNameTextView.text = "Last Name: Not Logged In"
@@ -71,8 +79,10 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val date = "$dayOfMonth/${month + 1}/$year"
-            Toast.makeText(this, "Selected date: $date", Toast.LENGTH_SHORT).show()
+            val selectedDate = "$year-${String.format("%02d", month + 1)}-${String.format("%02d", dayOfMonth)}"
+            currentUser?.uid?.let {
+                fetchWorkoutLogDetails(it, selectedDate)
+            } ?: Toast.makeText(this, "Please log in to view workout logs", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -103,5 +113,83 @@ class ProfileActivity : AppCompatActivity() {
                     Log.d("ProfileActivity", "Failed to retrieve user data: ", exception)
                 }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun fetchWorkoutLogs(memberId: String) {
+        val gymId = "GYM001" // Replace with actual method to fetch gymId
+
+        db.collection("Gym")
+            .document(gymId)
+            .collection("Members")
+            .document(memberId)
+            .collection("workout_logs")
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    for (document in documents) {
+                        val date = document.getString("date")
+                        if (date != null) {
+                            highlightCalendarDate(date)
+                        }
+                    }
+                } else {
+                    Log.d("ProfileActivity", "No workout logs found")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
+            }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun highlightCalendarDate(date: String) {
+        val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
+        val calendar = binding.calendarView
+
+        // Convert LocalDate to milliseconds
+        val dateInMillis = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        // Log for verification
+        Log.d("ProfileActivity", "Highlighting date: $localDate (Millis: $dateInMillis)")
+    }
+
+    private fun fetchWorkoutLogDetails(memberId: String, selectedDate: String) {
+        val gymId = "GYM001" // Replace with actual method to fetch gymId
+
+        db.collection("Gym")
+            .document(gymId)
+            .collection("Members")
+            .document(memberId)
+            .collection("workout_logs")
+            .whereEqualTo("date", selectedDate)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    val logs = StringBuilder()
+                    for (document in documents) {
+                        val workoutType = document.getString("workoutType") ?: "Unknown Workout"
+                        val pointsEarned = document.getLong("pointsEarned") ?: 0
+                        logs.append("Workout: $workoutType\nPoints: $pointsEarned\n\n")
+                    }
+                    showWorkoutLogsPopup(selectedDate, logs.toString())
+                } else {
+                    Toast.makeText(this, "No workouts found for $selectedDate", Toast.LENGTH_SHORT).show()
+                    Log.d("ProfileActivity", "No workouts found for $selectedDate")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
+            }
+    }
+
+    private fun showWorkoutLogsPopup(date: String, logs: String) {
+        // Use AlertDialog or any other popup to display the workout logs
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Workout Logs for $date")
+            .setMessage(logs)
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .create()
+        dialog.show()
     }
 }

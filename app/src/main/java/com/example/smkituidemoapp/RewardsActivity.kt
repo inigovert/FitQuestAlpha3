@@ -1,5 +1,7 @@
 package com.example.smkituidemoapp
 
+import ClaimedReward
+import ClaimedRewardsAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +19,9 @@ class RewardsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRewardsBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-    private lateinit var rewardsRecyclerView: RecyclerView
+
+    private lateinit var availableRewardsRecyclerView: RecyclerView
+    private lateinit var claimedRewardsRecyclerView: RecyclerView
 
     private var userPoints: Long = 0
     private var gymId: String? = null
@@ -30,8 +34,11 @@ class RewardsActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        rewardsRecyclerView = binding.rewardsRecyclerView
-        rewardsRecyclerView.layoutManager = LinearLayoutManager(this)
+        availableRewardsRecyclerView = binding.availableRewardsRecyclerView
+        claimedRewardsRecyclerView = binding.claimedRewardsRecyclerView
+
+        availableRewardsRecyclerView.layoutManager = LinearLayoutManager(this)
+        claimedRewardsRecyclerView.layoutManager = LinearLayoutManager(this)
 
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -52,10 +59,7 @@ class RewardsActivity : AppCompatActivity() {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
-                R.id.rewardsFragment -> {
-                    // Already in RewardsActivity, do nothing or handle differently if needed
-                    true
-                }
+                R.id.rewardsFragment -> true
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
                     true
@@ -79,6 +83,7 @@ class RewardsActivity : AppCompatActivity() {
                         gymId = document.reference.parent.parent?.id
                         if (gymId != null) {
                             loadRewardsList(gymId!!)
+                            loadClaimedRewards(document.reference)
                         } else {
                             Log.e("RewardsActivity", "Gym ID is null")
                         }
@@ -99,47 +104,34 @@ class RewardsActivity : AppCompatActivity() {
                 val rewardsList = mutableListOf<Reward>()
                 for (document in documents) {
                     val reward = document.toObject(Reward::class.java)
-                    reward.status = "claimable" // Default status
+                    reward.status = "claimable"
                     rewardsList.add(reward)
                 }
-                checkPendingRewards(rewardsList)
+                availableRewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
             }
             .addOnFailureListener { exception ->
                 Log.e("RewardsActivity", "Error getting rewards: ", exception)
             }
     }
 
-    private fun checkPendingRewards(rewardsList: MutableList<Reward>) {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            db.collectionGroup("Members")
-                .whereEqualTo("Email", currentUser.email)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents != null && !documents.isEmpty) {
-                        val document = documents.first()
-                        val memberDocRef = document.reference
-
-                        memberDocRef.collection("pending_rewards")
-                            .get()
-                            .addOnSuccessListener { pendingRewards ->
-                                for (pendingReward in pendingRewards) {
-                                    val rewardName = pendingReward.id
-                                    rewardsList.find { it.rewardName == rewardName }?.status = "pending"
-                                }
-                                rewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e("RewardsActivity", "Error getting pending rewards", e)
-                            }
-                    } else {
-                        Log.e("RewardsActivity", "No such document")
-                    }
+    private fun loadClaimedRewards(memberDocRef: DocumentReference) {
+        memberDocRef.collection("claimed_rewards")
+            .get()
+            .addOnSuccessListener { documents ->
+                val claimedRewardsList = mutableListOf<ClaimedReward>()
+                for (document in documents) {
+                    val claimedReward = ClaimedReward(
+                        rewardName = document.getString("rewardName") ?: "Unknown",
+                        rewardDescription = document.getString("rewardDescription") ?: "No Description",
+                        dateClaimed = document.id // Document ID used as date
+                    )
+                    claimedRewardsList.add(claimedReward)
                 }
-                .addOnFailureListener { e ->
-                    Log.e("RewardsActivity", "Error fetching user document", e)
-                }
-        }
+                claimedRewardsRecyclerView.adapter = ClaimedRewardsAdapter(claimedRewardsList)
+            }
+            .addOnFailureListener { e ->
+                Log.e("RewardsActivity", "Error fetching claimed rewards", e)
+            }
     }
 
     private fun claimReward(reward: Reward) {
@@ -191,7 +183,7 @@ class RewardsActivity : AppCompatActivity() {
         )
 
         memberDocRef.collection("pending_rewards")
-            .document(reward.rewardName)  // Use rewardName as the document ID
+            .document(reward.rewardName)
             .set(pendingReward)
             .addOnSuccessListener {
                 Log.d("RewardsActivity", "Reward added to pending rewards")

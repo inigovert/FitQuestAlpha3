@@ -10,8 +10,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Reward Name"
-        android:textSize="18sp"
         android:textAlignment="center"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
         android:textStyle="bold" />
 
     <TextView
@@ -20,29 +21,15 @@
         android:layout_height="wrap_content"
         android:text="Reward Description"
         android:textAlignment="center"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
 
     <TextView
-        android:id="@+id/requiredPointsTextView"
+        android:id="@+id/dateClaimedTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
-        android:text="Required Points"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/rewardStatusTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:text="Status"
-        android:textSize="14sp" />
-
-    <Button
-        android:id="@+id/claimRewardButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:text="Claim Reward" />
-
+        android:text="Date Claimed"
+        android:textSize="14sp"
+        android:textColor="@android:color/white" />
 </LinearLayout>
