@@ -5,7 +5,9 @@ import ClaimedRewardsAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -84,6 +86,7 @@ class RewardsActivity : AppCompatActivity() {
                         if (gymId != null) {
                             loadRewardsList(gymId!!)
                             loadClaimedRewards(document.reference)
+                            checkPendingRewards(document.reference)
                         } else {
                             Log.e("RewardsActivity", "Gym ID is null")
                         }
@@ -104,12 +107,10 @@ class RewardsActivity : AppCompatActivity() {
                 val rewardsList = mutableListOf<Reward>()
                 for (document in documents) {
                     val reward = document.toObject(Reward::class.java)
-                    reward.status = "claimable"
+                    reward.status = if (reward.quantity > 0) "claimable" else "On Cooldown"
                     rewardsList.add(reward)
                 }
                 availableRewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
-                // Ensure checkPendingRewards is called after the adapter is set
-                checkPendingRewards()
             }
             .addOnFailureListener { exception ->
                 Log.e("RewardsActivity", "Error getting rewards: ", exception)
@@ -136,105 +137,128 @@ class RewardsActivity : AppCompatActivity() {
             }
     }
 
-    private fun checkPendingRewards() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            db.collectionGroup("Members")
-                .whereEqualTo("Email", currentUser.email)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents != null && !documents.isEmpty) {
-                        val document = documents.first()
-                        val memberDocRef = document.reference
-
-                        memberDocRef.collection("pending_rewards")
-                            .get()
-                            .addOnSuccessListener { pendingRewards ->
-                                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as? RewardsAdapter
-                                currentRewardsAdapter?.let { adapter ->
-                                    for (pendingReward in pendingRewards) {
-                                        val rewardName = pendingReward.id
-                                        adapter.rewardsList.find { it.rewardName == rewardName }?.status = "pending"
-                                    }
-                                    adapter.notifyDataSetChanged()
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e("RewardsActivity", "Error getting pending rewards", e)
-                            }
-                    } else {
-                        Log.e("RewardsActivity", "No such document")
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("RewardsActivity", "Error fetching user document", e)
-                }
-        }
-    }
-
-    private fun claimReward(reward: Reward) {
-        val currentUser = auth.currentUser
-        if (currentUser != null && userPoints >= reward.requiredPoints) {
-            db.collectionGroup("Members")
-                .whereEqualTo("Email", currentUser.email)
-                .get()
-                .addOnSuccessListener { documents ->
-                    if (documents != null && !documents.isEmpty) {
-                        val document = documents.first()
-                        val memberDocRef = document.reference
-                        checkPendingRewardsAndAdd(memberDocRef, reward)
-                    } else {
-                        Log.e("RewardsActivity", "No such document to update")
-                        Toast.makeText(this, "Failed to claim reward. Please try again.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("RewardsActivity", "Error fetching user document: ", exception)
-                    Toast.makeText(this, "Failed to claim reward. Please try again.", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            Toast.makeText(this, "Not enough points to claim this reward.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun checkPendingRewardsAndAdd(memberDocRef: DocumentReference, reward: Reward) {
-        memberDocRef.collection("pending_rewards").document(reward.rewardName)
-            .get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    Toast.makeText(this, "Reward is already pending.", Toast.LENGTH_SHORT).show()
-                } else {
-                    addToPendingRewards(memberDocRef, reward)
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("RewardsActivity", "Error checking pending rewards", e)
-            }
-    }
-
-    private fun addToPendingRewards(memberDocRef: DocumentReference, reward: Reward) {
-        val pendingReward = hashMapOf(
-            "rewardName" to reward.rewardName,
-            "rewardDescription" to reward.rewardDescription,
-            "requiredPoints" to reward.requiredPoints,
-            "status" to "pending"
-        )
-
+    private fun checkPendingRewards(memberDocRef: DocumentReference) {
         memberDocRef.collection("pending_rewards")
-            .document(reward.rewardName)
-            .set(pendingReward)
-            .addOnSuccessListener {
-                Log.d("RewardsActivity", "Reward added to pending rewards")
-                Toast.makeText(this, "Reward added to pending rewards.", Toast.LENGTH_SHORT).show()
-                // Update the status of the reward in the rewards list
+            .get()
+            .addOnSuccessListener { pendingRewards ->
                 val currentRewardsAdapter = availableRewardsRecyclerView.adapter as? RewardsAdapter
                 currentRewardsAdapter?.let { adapter ->
-                    adapter.rewardsList.find { it.rewardName == reward.rewardName }?.status = "pending"
+                    for (pendingReward in pendingRewards) {
+                        val rewardName = pendingReward.id
+                        adapter.rewardsList.find { it.rewardName == rewardName }?.status = "pending"
+                    }
                     adapter.notifyDataSetChanged()
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("RewardsActivity", "Error adding to pending rewards", e)
+                Log.e("RewardsActivity", "Error getting pending rewards", e)
+            }
+    }
+
+    private fun claimReward(reward: Reward) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            if (reward.quantity <= 0) {
+                Toast.makeText(this, "This reward is on cooldown and cannot be claimed.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Prompt user to enter the quantity they want to claim
+            val input = EditText(this)
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Claim ${reward.rewardName}")
+                .setMessage("Enter the quantity to claim:")
+                .setView(input)
+                .setPositiveButton("Claim") { _, _ ->
+                    val quantityToClaim = input.text.toString().toIntOrNull() ?: 0
+                    if (quantityToClaim <= 0 || quantityToClaim > reward.quantity) {
+                        Toast.makeText(this, "Invalid quantity.", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+
+                    val totalPointsRequired = reward.requiredPoints * quantityToClaim
+                    if (totalPointsRequired > userPoints) {
+                        Toast.makeText(this, "Not enough points to claim this quantity.", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+
+                    // Proceed to claim reward and add to pending rewards
+                    db.collectionGroup("Members")
+                        .whereEqualTo("Email", currentUser.email)
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            if (documents != null && !documents.isEmpty) {
+                                val document = documents.first()
+                                val memberDocRef = document.reference
+                                claimRewardAndUpdatePoints(memberDocRef, reward, quantityToClaim)
+                            } else {
+                                Log.e("RewardsActivity", "No such document to update")
+                                Toast.makeText(this, "Failed to claim reward. Please try again.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e("RewardsActivity", "Error fetching user document: ", exception)
+                            Toast.makeText(this, "Failed to claim reward. Please try again.", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .setNegativeButton("Cancel", null)
+                .create()
+
+            dialog.show()
+        } else {
+            Toast.makeText(this, "You need to be logged in to claim rewards.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun claimRewardAndUpdatePoints(memberDocRef: DocumentReference, reward: Reward, quantityToClaim: Int) {
+        // Deduct points
+        val totalPointsRequired = reward.requiredPoints * quantityToClaim
+        userPoints -= totalPointsRequired
+        binding.currentPointsTextView.text = "Current Points: $userPoints"
+
+        // Update quantity
+        reward.quantity -= quantityToClaim
+        if (reward.quantity <= 0) {
+            reward.status = "On Cooldown"
+        }
+
+        // Update Firestore Points
+        memberDocRef.update("Points", userPoints)
+            .addOnSuccessListener {
+                addToPendingRewards(memberDocRef, reward, quantityToClaim)
+            }
+            .addOnFailureListener { e ->
+                Log.e("RewardsActivity", "Error updating points: ", e)
+                Toast.makeText(this, "Failed to update points. Please try again.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun addToPendingRewards(memberDocRef: DocumentReference, reward: Reward, quantityToClaim: Int) {
+        val pendingReward = hashMapOf(
+            "rewardName" to reward.rewardName,
+            "rewardDescription" to reward.rewardDescription,
+            "quantityClaimed" to quantityToClaim,
+            "status" to "pending"
+        )
+
+        val pendingRewardId = "${reward.rewardName}_${System.currentTimeMillis()}"
+
+        memberDocRef.collection("pending_rewards")
+            .document(pendingRewardId)
+            .set(pendingReward)
+            .addOnSuccessListener {
+                Log.d("RewardsActivity", "Reward added to pending rewards")
+
+                Toast.makeText(this, "Reward added to pending rewards.", Toast.LENGTH_SHORT).show()
+
+                // Update UI to reflect the pending status
+                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as? RewardsAdapter
+                currentRewardsAdapter?.rewardsList?.find { it.rewardName == reward.rewardName }?.status = "pending"
+                currentRewardsAdapter?.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Log.e("RewardsActivity", "Error adding to pending rewards: ", e)
+                Toast.makeText(this, "Failed to add to pending rewards. Please try again.", Toast.LENGTH_SHORT).show()
             }
     }
 }
