@@ -84,6 +84,7 @@ class RewardsActivity : AppCompatActivity() {
                         if (gymId != null) {
                             loadRewardsList(gymId!!)
                             loadClaimedRewards(document.reference)
+                            checkPendingRewards(document.reference)
                         } else {
                             Log.e("RewardsActivity", "Gym ID is null")
                         }
@@ -131,6 +132,22 @@ class RewardsActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e("RewardsActivity", "Error fetching claimed rewards", e)
+            }
+    }
+
+    private fun checkPendingRewards(memberDocRef: DocumentReference) {
+        memberDocRef.collection("pending_rewards")
+            .get()
+            .addOnSuccessListener { pendingRewards ->
+                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as RewardsAdapter
+                for (pendingReward in pendingRewards) {
+                    val rewardName = pendingReward.id
+                    currentRewardsAdapter.rewardsList.find { it.rewardName == rewardName }?.status = "pending"
+                }
+                currentRewardsAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Log.e("RewardsActivity", "Error getting pending rewards", e)
             }
     }
 
@@ -188,6 +205,10 @@ class RewardsActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d("RewardsActivity", "Reward added to pending rewards")
                 Toast.makeText(this, "Reward added to pending rewards.", Toast.LENGTH_SHORT).show()
+                // Update the status of the reward in the rewards list
+                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as RewardsAdapter
+                currentRewardsAdapter.rewardsList.find { it.rewardName == reward.rewardName }?.status = "pending"
+                currentRewardsAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { e ->
                 Log.e("RewardsActivity", "Error adding to pending rewards", e)

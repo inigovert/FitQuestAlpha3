@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class RewardsAdapter(
-    private val rewardsList: List<Reward>,
+    val rewardsList: List<Reward>,
     private val userPoints: Long,
     private val claimRewardCallback: (Reward) -> Unit
 ) : RecyclerView.Adapter<RewardsAdapter.RewardViewHolder>() {
