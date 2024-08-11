@@ -84,7 +84,6 @@ class RewardsActivity : AppCompatActivity() {
                         if (gymId != null) {
                             loadRewardsList(gymId!!)
                             loadClaimedRewards(document.reference)
-                            checkPendingRewards(document.reference)
                         } else {
                             Log.e("RewardsActivity", "Gym ID is null")
                         }
@@ -109,6 +108,8 @@ class RewardsActivity : AppCompatActivity() {
                     rewardsList.add(reward)
                 }
                 availableRewardsRecyclerView.adapter = RewardsAdapter(rewardsList, userPoints, ::claimReward)
+                // Ensure checkPendingRewards is called after the adapter is set
+                checkPendingRewards()
             }
             .addOnFailureListener { exception ->
                 Log.e("RewardsActivity", "Error getting rewards: ", exception)
@@ -135,20 +136,40 @@ class RewardsActivity : AppCompatActivity() {
             }
     }
 
-    private fun checkPendingRewards(memberDocRef: DocumentReference) {
-        memberDocRef.collection("pending_rewards")
-            .get()
-            .addOnSuccessListener { pendingRewards ->
-                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as RewardsAdapter
-                for (pendingReward in pendingRewards) {
-                    val rewardName = pendingReward.id
-                    currentRewardsAdapter.rewardsList.find { it.rewardName == rewardName }?.status = "pending"
+    private fun checkPendingRewards() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            db.collectionGroup("Members")
+                .whereEqualTo("Email", currentUser.email)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents != null && !documents.isEmpty) {
+                        val document = documents.first()
+                        val memberDocRef = document.reference
+
+                        memberDocRef.collection("pending_rewards")
+                            .get()
+                            .addOnSuccessListener { pendingRewards ->
+                                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as? RewardsAdapter
+                                currentRewardsAdapter?.let { adapter ->
+                                    for (pendingReward in pendingRewards) {
+                                        val rewardName = pendingReward.id
+                                        adapter.rewardsList.find { it.rewardName == rewardName }?.status = "pending"
+                                    }
+                                    adapter.notifyDataSetChanged()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("RewardsActivity", "Error getting pending rewards", e)
+                            }
+                    } else {
+                        Log.e("RewardsActivity", "No such document")
+                    }
                 }
-                currentRewardsAdapter.notifyDataSetChanged()
-            }
-            .addOnFailureListener { e ->
-                Log.e("RewardsActivity", "Error getting pending rewards", e)
-            }
+                .addOnFailureListener { e ->
+                    Log.e("RewardsActivity", "Error fetching user document", e)
+                }
+        }
     }
 
     private fun claimReward(reward: Reward) {
@@ -206,9 +227,11 @@ class RewardsActivity : AppCompatActivity() {
                 Log.d("RewardsActivity", "Reward added to pending rewards")
                 Toast.makeText(this, "Reward added to pending rewards.", Toast.LENGTH_SHORT).show()
                 // Update the status of the reward in the rewards list
-                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as RewardsAdapter
-                currentRewardsAdapter.rewardsList.find { it.rewardName == reward.rewardName }?.status = "pending"
-                currentRewardsAdapter.notifyDataSetChanged()
+                val currentRewardsAdapter = availableRewardsRecyclerView.adapter as? RewardsAdapter
+                currentRewardsAdapter?.let { adapter ->
+                    adapter.rewardsList.find { it.rewardName == reward.rewardName }?.status = "pending"
+                    adapter.notifyDataSetChanged()
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("RewardsActivity", "Error adding to pending rewards", e)
