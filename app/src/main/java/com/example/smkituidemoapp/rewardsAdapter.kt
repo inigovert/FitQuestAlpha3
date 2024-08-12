@@ -33,11 +33,13 @@ class RewardsAdapter(
         private val claimRewardButton: Button = itemView.findViewById(R.id.claimRewardButton)
 
         fun bind(reward: Reward) {
-            rewardNameTextView.text = reward.rewardName
+            // Display reward name with quantity
+            rewardNameTextView.text = "${reward.rewardName} (x${reward.quantity})"
             rewardDescriptionTextView.text = reward.rewardDescription
             requiredPointsTextView.text = "Required Points: ${reward.requiredPoints}"
             rewardStatusTextView.text = "Status: ${reward.status}"
 
+            // Enable claim button if reward is claimable and user has enough points
             claimRewardButton.isEnabled = reward.status == "claimable" && userPoints >= reward.requiredPoints
             claimRewardButton.setOnClickListener {
                 claimRewardCallback(reward)
