@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -21,7 +20,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.smkituidemoapp.databinding.MainActivityBinding
 import com.example.smkituidemoapp.viewModels.MainViewModel
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,18 +30,14 @@ import com.sency.smkitui.model.ExerciseData
 import com.sency.smkitui.model.SMExercise
 import com.sency.smkitui.model.SMWorkout
 import com.sency.smkitui.model.WorkoutSummaryData
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var dailyProgressTextView: TextView
     private lateinit var db: FirebaseFirestore
     private var _binding: MainActivityBinding? = null
     private val binding get() = _binding!!
@@ -51,8 +45,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     private var smKitUI: SMKitUI? = null
     private val tag = this::class.java.simpleName
     private val apiPublicKey = "public_live_BrYk+UxJaahIPdnb"
-    private var completedWorkouts = 0
-    private val totalWorkouts = 4
+
 
     private val configurationResult = object : ConfigurationResult {
         override fun onFailure() {
@@ -332,6 +325,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun saveWorkoutLog(points: Int) {
         val email = getUserEmail()
+        Log.d("ProfileActivity", "Saving workout log for email: $email with points: $points")
+
         if (email != null) {
             db.collectionGroup("Members")
                 .whereEqualTo("Email", email)
@@ -342,6 +337,8 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                         val gymId = document.reference.parent.parent?.id
                         val userId = document.id
 
+                        Log.d("ProfileActivity", "Found gymId: $gymId, userId: $userId")
+
                         if (gymId != null && userId != null) {
                             val userRef = db.collection("Gym").document(gymId).collection("Members")
                                 .document(userId)
@@ -351,22 +348,25 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
                             )
                             userRef.collection("workout_logs")
                                 .add(workoutLog)
-                                .addOnSuccessListener { Log.d(tag, "Workout log added") }
+                                .addOnSuccessListener { Log.d("ProfileActivity", "Workout log added successfully for userId: $userId") }
                                 .addOnFailureListener { e ->
-                                    Log.w(tag, "Error adding workout log", e)
+                                    Log.w("ProfileActivity", "Error adding workout log", e)
                                 }
                         } else {
-                            Log.e(tag, "Error: Could not determine gymId or userId.")
+                            Log.e("ProfileActivity", "Error: Could not determine gymId or userId.")
                         }
                     } else {
-                        Log.d(tag, "No such document")
+                        Log.d("ProfileActivity", "No document found for email: $email")
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("MainActivity", "Error fetching document", e)
+                    Log.e("ProfileActivity", "Error fetching document", e)
                 }
+        } else {
+            Log.d("ProfileActivity", "Email is null, cannot save workout log")
         }
     }
+
 
     private fun getUserEmail(): String? {
         return FirebaseAuth.getInstance().currentUser?.email
@@ -382,6 +382,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun loadUserData() {
         val userId = getUserId()
         if (userId != null) {
@@ -413,6 +414,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun getUserId(): String? {
         var userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId == null) {

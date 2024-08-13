@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.CalendarView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -14,7 +13,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -61,7 +62,13 @@ class ProfileActivity : AppCompatActivity() {
 
         if (currentUser != null) {
             loadUserData(currentUser.email)
-            fetchWorkoutLogs(currentUser.uid)
+            fetchGymIdAndUserId { gymId, userId ->
+                if (gymId != null && userId != null) {
+                    fetchWorkoutLogs(gymId, userId)
+                } else {
+                    Log.d("ProfileActivity", "Failed to fetch gymId or memberId")
+                }
+            }
         } else {
             binding.firstNameTextView.text = "First Name: Not Logged In"
             binding.lastNameTextView.text = "Last Name: Not Logged In"
@@ -79,9 +86,13 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val selectedDate = "$year-${String.format("%02d", month + 1)}-${String.format("%02d", dayOfMonth)}"
-            currentUser?.uid?.let {
-                fetchWorkoutLogDetails(it, selectedDate)
-            } ?: Toast.makeText(this, "Please log in to view workout logs", Toast.LENGTH_SHORT).show()
+            fetchGymIdAndUserId { gymId, userId ->
+                if (gymId != null && userId != null) {
+                    fetchWorkoutLogDetails(gymId, userId, selectedDate)
+                } else {
+                    Toast.makeText(this, "Please log in to view workout logs", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -114,7 +125,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchGymIdAndMemberId(callback: (gymId: String?, memberId: String?) -> Unit) {
+    private fun fetchGymIdAndUserId(callback: (gymId: String?, userId: String?) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             val userEmail = currentUser.email
@@ -144,39 +155,36 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun fetchWorkoutLogs(memberId: String) {
-        fetchGymIdAndMemberId { gymId, _ ->
-            if (gymId != null) {
-                db.collection("Gym")
-                    .document(gymId)
-                    .collection("Members")
-                    .document(memberId)
-                    .collection("workout_logs")
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        if (!documents.isEmpty) {
-                            for (document in documents) {
-                                val timestamp = document.getTimestamp("date")
-                                if (timestamp != null) {
-                                    val localDate = timestamp.toDate().toInstant()
-                                        .atZone(ZoneId.systemDefault())
-                                        .toLocalDate()
-                                    highlightCalendarDate(localDate.toString())
-                                }
-                            }
+    private fun fetchWorkoutLogs(gymId: String, memberId: String) {
+        Log.d("ProfileActivity", "Fetching workout logs for memberId: $memberId in gymId: $gymId")
+        db.collection("Gym")
+            .document(gymId)
+            .collection("Members")
+            .document(memberId)
+            .collection("workout_logs")
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    for (document in documents) {
+                        val timestamp = document.getTimestamp("date")
+                        Log.d("ProfileActivity", "Document ID: ${document.id}, timestamp: $timestamp, data: ${document.data}")
+                        if (timestamp != null) {
+                            val localDate = timestamp.toDate().toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            highlightCalendarDate(localDate.toString())
                         } else {
-                            Log.d("ProfileActivity", "No workout logs found")
+                            Log.d("ProfileActivity", "No timestamp found for document: ${document.id}")
                         }
                     }
-                    .addOnFailureListener { exception ->
-                        Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
-                    }
-            } else {
-                Toast.makeText(this, "Gym ID not found", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.d("ProfileActivity", "No workout logs found for memberId: $memberId in gymId: $gymId")
+                }
             }
-        }
+            .addOnFailureListener { exception ->
+                Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
+            }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -187,29 +195,30 @@ class ProfileActivity : AppCompatActivity() {
         // Highlighting logic: Use your preferred method to highlight dates on the calendar.
         // Since Android's default CalendarView doesn't support direct highlighting, you'll
         // have to implement custom logic, potentially with a library or custom view overlay.
-
-        // Example (toast-based notification):
-        Toast.makeText(this, "Workout log exists on $localDate", Toast.LENGTH_SHORT).show()
-
         // Log for verification
         Log.d("ProfileActivity", "Highlighting date: $localDate")
     }
 
-    private fun fetchWorkoutLogDetails(memberId: String, selectedDate: String) {
-        val gymId = "GYM001" // Replace with actual method to fetch gymId
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun fetchWorkoutLogDetails(gymId: String, userId: String, selectedDate: String) {
+        val selectedLocalDate = LocalDate.parse(selectedDate)
+
+        // Convert LocalDate to Date
+        val startOfDay = Date.from(selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+        val endOfDay = Date.from(selectedLocalDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant())
 
         db.collection("Gym")
             .document(gymId)
             .collection("Members")
-            .document(memberId)
+            .document(userId)
             .collection("workout_logs")
-            .whereEqualTo("date", selectedDate)
+            .whereGreaterThanOrEqualTo("date", startOfDay)
+            .whereLessThan("date", endOfDay)
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
                     val logs = StringBuilder()
                     for (document in documents) {
-
                         val pointsEarned = document.getLong("pointsEarned") ?: 0
                         logs.append("Points: $pointsEarned\n\n")
                     }
@@ -223,6 +232,8 @@ class ProfileActivity : AppCompatActivity() {
                 Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
             }
     }
+
+
 
     private fun showWorkoutLogsPopup(date: String, logs: String) {
         // Use AlertDialog or any other popup to display the workout logs
