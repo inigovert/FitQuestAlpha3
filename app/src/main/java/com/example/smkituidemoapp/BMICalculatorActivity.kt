@@ -161,6 +161,8 @@ class BMICalculatorActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun plotWeightData(entries: List<Entry>) {
         if (entries.isEmpty()) {
             lineChart.clear()

@@ -20,6 +20,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private lateinit var db: FirebaseFirestore
+    private val datesWithLogs = mutableSetOf<LocalDate>() // Track dates with workout logs
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,9 +42,7 @@ class ProfileActivity : AppCompatActivity() {
                     startActivity(Intent(this, MainActivity::class.java))
                     true
                 }
-                R.id.profileFragment -> {
-                    true
-                }
+                R.id.profileFragment -> true
                 R.id.bmiFragment -> {
                     startActivity(Intent(this, BMICalculatorActivity::class.java))
                     true
@@ -115,43 +114,85 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun fetchWorkoutLogs(memberId: String) {
-        val gymId = "GYM001" // Replace with actual method to fetch gymId
-
-        db.collection("Gym")
-            .document(gymId)
-            .collection("Members")
-            .document(memberId)
-            .collection("workout_logs")
-            .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
-                    for (document in documents) {
-                        val date = document.getString("date")
-                        if (date != null) {
-                            highlightCalendarDate(date)
+    private fun fetchGymIdAndMemberId(callback: (gymId: String?, memberId: String?) -> Unit) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val userEmail = currentUser.email
+            if (userEmail != null) {
+                db.collectionGroup("Members")
+                    .whereEqualTo("Email", userEmail)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            val document = documents.first()
+                            val gymId = document.reference.parent.parent?.id
+                            val memberId = document.id
+                            callback(gymId, memberId)
+                        } else {
+                            callback(null, null)
                         }
                     }
-                } else {
-                    Log.d("ProfileActivity", "No workout logs found")
-                }
+                    .addOnFailureListener { exception ->
+                        Log.d("ProfileActivity", "Failed to retrieve gym and member IDs: ", exception)
+                        callback(null, null)
+                    }
+            } else {
+                callback(null, null)
             }
-            .addOnFailureListener { exception ->
-                Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
+        } else {
+            callback(null, null)
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun fetchWorkoutLogs(memberId: String) {
+        fetchGymIdAndMemberId { gymId, _ ->
+            if (gymId != null) {
+                db.collection("Gym")
+                    .document(gymId)
+                    .collection("Members")
+                    .document(memberId)
+                    .collection("workout_logs")
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            for (document in documents) {
+                                val timestamp = document.getTimestamp("date")
+                                if (timestamp != null) {
+                                    val localDate = timestamp.toDate().toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate()
+                                    highlightCalendarDate(localDate.toString())
+                                }
+                            }
+                        } else {
+                            Log.d("ProfileActivity", "No workout logs found")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("ProfileActivity", "Failed to retrieve workout logs: ", exception)
+                    }
+            } else {
+                Toast.makeText(this, "Gym ID not found", Toast.LENGTH_SHORT).show()
             }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun highlightCalendarDate(date: String) {
         val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
-        val calendar = binding.calendarView
+        datesWithLogs.add(localDate)
 
-        // Convert LocalDate to milliseconds
-        val dateInMillis = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        // Highlighting logic: Use your preferred method to highlight dates on the calendar.
+        // Since Android's default CalendarView doesn't support direct highlighting, you'll
+        // have to implement custom logic, potentially with a library or custom view overlay.
+
+        // Example (toast-based notification):
+        Toast.makeText(this, "Workout log exists on $localDate", Toast.LENGTH_SHORT).show()
 
         // Log for verification
-        Log.d("ProfileActivity", "Highlighting date: $localDate (Millis: $dateInMillis)")
+        Log.d("ProfileActivity", "Highlighting date: $localDate")
     }
 
     private fun fetchWorkoutLogDetails(memberId: String, selectedDate: String) {
@@ -168,9 +209,9 @@ class ProfileActivity : AppCompatActivity() {
                 if (!documents.isEmpty) {
                     val logs = StringBuilder()
                     for (document in documents) {
-                        val workoutType = document.getString("workoutType") ?: "Unknown Workout"
+
                         val pointsEarned = document.getLong("pointsEarned") ?: 0
-                        logs.append("Workout: $workoutType\nPoints: $pointsEarned\n\n")
+                        logs.append("Points: $pointsEarned\n\n")
                     }
                     showWorkoutLogsPopup(selectedDate, logs.toString())
                 } else {
