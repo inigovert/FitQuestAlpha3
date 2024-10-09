@@ -45,5 +45,9 @@
             android:theme="@style/Theme.SMKitUIDemoApp">
             android:screenOrientation="portrait">
     </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 </manifest>

@@ -71,7 +71,6 @@ class ProfileActivity : AppCompatActivity() {
             }
         } else {
             binding.firstNameTextView.text = "First Name: Not Logged In"
-            binding.lastNameTextView.text = "Last Name: Not Logged In"
             binding.emailTextView.text = "Email: Not Logged In"
             binding.pointsTextView.text = "Points: N/A"
         }
@@ -106,15 +105,16 @@ class ProfileActivity : AppCompatActivity() {
                         val document = documents.first()
                         val firstName = document.getString("First Name") ?: "No First Name"
                         val lastName = document.getString("Last Name") ?: "No Last Name"
+                        val fullName = "$firstName $lastName"
                         val email = document.getString("Email") ?: "No Email"
                         val points = document.getDouble("Points") ?: 0.0
+                        val status = document.getString("Status") ?: "No Status"
 
-                        Log.d("ProfileActivity", "Retrieved data - FirstName: $firstName, LastName: $lastName, Email: $email, Points: $points")
+                        Log.d("ProfileActivity", "Retrieved data - FullName: $fullName, Email: $email, Points: $points, Status: $status")
 
-                        binding.firstNameTextView.text = "First Name: $firstName"
-                        binding.lastNameTextView.text = "Last Name: $lastName"
-                        binding.emailTextView.text = "Email: $email"
-                        binding.pointsTextView.text = "Points: $points"
+                        binding.firstNameTextView.text = fullName
+                        binding.emailTextView.text = email
+                        binding.pointsTextView.text = "$points Points"
                     } else {
                         Log.d("ProfileActivity", "No such document")
                     }
@@ -124,6 +124,7 @@ class ProfileActivity : AppCompatActivity() {
                 }
         }
     }
+
 
     private fun fetchGymIdAndUserId(callback: (gymId: String?, userId: String?) -> Unit) {
         val currentUser = FirebaseAuth.getInstance().currentUser
