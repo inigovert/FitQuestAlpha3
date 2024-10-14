@@ -37,6 +37,9 @@ class ProfileActivity : AppCompatActivity() {
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.itemIconTintList = null
 
+        // Set the selected item as profileFragment when in ProfileActivity
+        bottomNavigationView.selectedItemId = R.id.profileFragment
+
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {

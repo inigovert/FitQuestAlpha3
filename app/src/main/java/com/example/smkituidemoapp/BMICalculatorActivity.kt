@@ -59,6 +59,9 @@ class BMICalculatorActivity : AppCompatActivity() {
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.itemIconTintList = null
 
+        // Set the selected item as bmiFragment when in BMICalculatorActivity
+        bottomNavigationView.selectedItemId = R.id.bmiFragment
+
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {

@@ -46,12 +46,16 @@ class RewardsActivity : AppCompatActivity() {
         if (currentUser != null) {
             loadUserGymAndPoints(currentUser.email)
         }
-
         setupBottomNavigationBar()
     }
 
     private fun setupBottomNavigationBar() {
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
+        val bottomNavigationView = binding.bottomNavigation
+
+        // Set the selected item as rewardsFragment when in RewardsActivity
+        bottomNavigationView.selectedItemId = R.id.rewardsFragment
+
+        bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.homeFragment -> {
                     startActivity(Intent(this, MainActivity::class.java))
@@ -70,6 +74,7 @@ class RewardsActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun loadUserGymAndPoints(email: String?) {
         if (email != null) {

@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity(), SMKitUIWorkoutListener {
 
         val bottomNavigationView = binding.bottomNavigation
         bottomNavigationView.itemIconTintList = null
+        bottomNavigationView.selectedItemId = R.id.homeFragment //highlighting
         bottomNavigationView.setOnItemSelectedListener { item ->
             val auth = FirebaseAuth.getInstance()
             val currentUser = auth.currentUser
